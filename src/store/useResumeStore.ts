@@ -7,6 +7,8 @@ import {
   AiSuggestions,
   AiSuggestionRewrite,
 } from '@/types/resume';
+import { validateResumeData } from '@/lib/validation';
+
 
 interface ResumeState {
   // Data State
@@ -25,7 +27,7 @@ interface ResumeState {
   activeSuggestionsApplied: Record<string, boolean>; // track applied suggestions to toggle UI checkmarks
 
   // Actions
-  fetchResume: () => Promise<void>;
+  fetchResume: (resumeId?: string) => Promise<void>;
   saveResume: () => Promise<boolean>;
   updateField: (path: string, value: any) => void;
   setActiveSection: (section: string) => void;
@@ -45,6 +47,14 @@ interface ResumeState {
   addCertification: () => void;
   removeCertification: (id: string) => void;
 
+  // Resume title
+  resumeTitle: string;
+  setResumeTitle: (title: string) => void;
+  
+  // Validation State & Actions
+  validationErrors: Record<string, string>;
+  validateResume: () => boolean;
+
   // AI Actions
   runAiOptimization: (jdText: string, company: string, role: string) => Promise<void>;
   applyAiSuggestion: (rewrite: AiSuggestionRewrite, index: number) => void;
@@ -53,104 +63,22 @@ interface ResumeState {
 
 export const DEFAULT_RESUME_DATA: ResumeData = {
   personalInfo: {
-    fullName: 'Nguyễn Văn A',
-    title: 'Senior Frontend Engineer',
-    email: 'nguyenvana@gmail.com',
-    phone: '+84 901 234 567',
-    website: 'https://nguyenvana.dev',
-    github: 'github.com/nguyenvana',
-    linkedin: 'linkedin.com/in/nguyenvana',
-    location: 'Hồ Chí Minh, Việt Nam',
-    summary: 'Kỹ sư Frontend với hơn 5 năm kinh nghiệm thiết kế và phát triển các ứng dụng web quy mô lớn sử dụng React/Next.js. Có thế mạnh về tối ưu hóa hiệu năng frontend, xây dựng hệ thống UI/UX tương tác mượt mà và phát triển kiến trúc Micro-Frontend.',
+    fullName: '',
+    title: '',
+    email: '',
+    phone: '',
+    website: '',
+    github: '',
+    linkedin: '',
+    location: '',
+    summary: '',
   },
-  workExperience: [
-    {
-      id: 'exp-1',
-      company: 'TechCorp JSC',
-      position: 'Senior Frontend Engineer',
-      location: 'Hồ Chí Minh, Việt Nam',
-      startDate: '2022-03',
-      endDate: 'Present',
-      current: true,
-      description: [
-        'Trưởng nhóm frontend xây dựng nền tảng thương mại điện tử bằng Next.js, nâng tốc độ tải trang lên 40% và đạt điểm số Lighthouse SEO tối đa (99/100).',
-        'Thiết kế và triển khai kiến trúc Micro-Frontend hỗ trợ 3 dự án nhánh chạy độc lập, tối ưu 50% tài nguyên server.',
-        'Tích hợp và xây dựng thư viện UI dùng chung cho toàn công ty giúp rút ngắn 35% thời gian phát triển của các phòng ban.'
-      ],
-    },
-    {
-      id: 'exp-2',
-      company: 'Innova Solutions',
-      position: 'Frontend Developer',
-      location: 'Hồ Chí Minh, Việt Nam',
-      startDate: '2019-09',
-      endDate: '2022-02',
-      current: false,
-      description: [
-        'Phát triển và bảo trì hệ thống Dashboard phân tích dữ liệu thời gian thực sử dụng ReactJS, Redux Toolkit và TailwindCSS.',
-        'Hợp tác chặt chẽ với đội ngũ UX/UI để chuyển hóa thiết kế Figma thành các component có khả năng tái sử dụng cao và responsive hoàn hảo.'
-      ],
-    }
-  ],
-  education: [
-    {
-      id: 'edu-1',
-      school: 'Đại học Khoa học Tự nhiên',
-      degree: 'Cử nhân Công nghệ Thông tin',
-      fieldOfStudy: 'Khoa học Máy tính',
-      location: 'Hồ Chí Minh, Việt Nam',
-      startDate: '2015-09',
-      endDate: '2019-06',
-      description: 'Tốt nghiệp loại Giỏi. GPA: 3.6/4.0. Đề tài khóa luận nghiên cứu ứng dụng AI vào gợi ý lộ trình học tập.',
-    }
-  ],
-  skills: [
-    {
-      id: 'skill-1',
-      category: 'Ngôn ngữ lập trình',
-      items: ['JavaScript', 'TypeScript', 'HTML5', 'CSS3', 'Python'],
-    },
-    {
-      id: 'skill-2',
-      category: 'Frameworks / Thư viện',
-      items: ['React.js', 'Next.js (App Router)', 'Vue.js', 'TailwindCSS', 'Redux Toolkit', 'Node.js'],
-    },
-    {
-      id: 'skill-3',
-      category: 'Công cụ & Hệ điều hành',
-      items: ['Git', 'Docker', 'Webpack', 'Vite', 'CI/CD (GitHub Actions)', 'Linux'],
-    }
-  ],
-  projects: [
-    {
-      id: 'proj-1',
-      name: 'FitCV.ai - AI Resume Optimizer',
-      role: 'Lead Full-stack Developer',
-      description: 'Ứng dụng tối ưu hóa CV theo Job Description dựa trên trí tuệ nhân tạo. Giúp ứng viên tự động căn chỉnh CV phù hợp với bộ lọc ATS tuyển dụng.',
-      technologies: ['Next.js', 'TailwindCSS', 'Zustand', 'Mongoose', 'Gemini API'],
-      url: 'https://github.com/nguyenvana/fit-cv-ai',
-    }
-  ],
-  languages: [
-    {
-      id: 'lang-1',
-      language: 'Tiếng Việt',
-      proficiency: 'Bản xứ',
-    },
-    {
-      id: 'lang-2',
-      language: 'Tiếng Anh',
-      proficiency: 'Thành thạo (IELTS 7.0)',
-    }
-  ],
-  certifications: [
-    {
-      id: 'cert-1',
-      name: 'AWS Certified Cloud Practitioner',
-      issuer: 'Amazon Web Services',
-      date: '2023-08',
-    }
-  ],
+  workExperience: [],
+  education: [],
+  skills: [],
+  projects: [],
+  languages: [],
+  certifications: [],
   layout: {
     template: 'two-columns-left',
     themeColor: 'emerald',
@@ -164,6 +92,7 @@ const generateId = () => Math.random().toString(36).substring(2, 9);
 export const useResumeStore = create<ResumeState>((set, get) => ({
   // Initial States
   resumeId: null,
+  resumeTitle: '',
   versionId: null,
   versionNumber: 1,
   resumeData: DEFAULT_RESUME_DATA,
@@ -174,24 +103,29 @@ export const useResumeStore = create<ResumeState>((set, get) => ({
   isOptimizing: false,
   aiSuggestions: null,
   activeSuggestionsApplied: {},
+  validationErrors: {},
 
   setActiveSection: (section) => set({ activeSection: section }),
+
+  setResumeTitle: (title) => set({ resumeTitle: title }),
 
   setZoomRatio: (ratio) => set((state) => ({
     zoomRatio: typeof ratio === 'function' ? ratio(state.zoomRatio) : ratio
   })),
 
   // Fetch from Mongoose via API
-  fetchResume: async () => {
+  fetchResume: async (resumeId?: string) => {
     set({ isLoading: true });
     try {
-      const res = await apiClient.get('/api/resumes');
+      const url = resumeId ? `/api/resumes?id=${resumeId}` : '/api/resumes';
+      const res = await apiClient.get(url);
       const data = res.data;
 
       if (!data.resume) {
         console.warn('Database is offline or no resume found. App is running in Demo/Offline mode.');
         set({
           resumeId: null,
+          resumeTitle: '',
           versionId: null,
           versionNumber: 1,
           resumeData: DEFAULT_RESUME_DATA,
@@ -201,14 +135,16 @@ export const useResumeStore = create<ResumeState>((set, get) => ({
 
       set({
         resumeId: data.resume._id,
-        versionId: data.activeVersion._id,
-        versionNumber: data.activeVersion.versionNumber,
-        resumeData: data.activeVersion.content,
+        resumeTitle: data.resume.title || '',
+        versionId: data.activeVersion?._id || null,
+        versionNumber: data.activeVersion?.versionNumber || 1,
+        resumeData: data.activeVersion?.content || DEFAULT_RESUME_DATA,
       });
     } catch (e: any) {
       console.warn('Could not fetch resume from database, running in Demo/Offline mode. Detail:', e.message || e);
       set({
         resumeId: null,
+        resumeTitle: '',
         versionId: null,
         versionNumber: 1,
         resumeData: DEFAULT_RESUME_DATA,
@@ -249,7 +185,17 @@ export const useResumeStore = create<ResumeState>((set, get) => ({
   // Update a single nested field (g.e., 'personalInfo.fullName')
   updateField: (path, value) => set(produce((state) => {
     lodashSet(state.resumeData, path, value);
+    if (state.validationErrors && state.validationErrors[path]) {
+      delete state.validationErrors[path];
+    }
   })),
+
+  validateResume: () => {
+    const { resumeData } = get();
+    const errors = validateResumeData(resumeData);
+    set({ validationErrors: errors });
+    return Object.keys(errors).length === 0;
+  },
 
   // Array actions
   addWorkExperience: () => set(produce((state) => {

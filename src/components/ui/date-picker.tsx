@@ -13,9 +13,10 @@ interface DatePickerProps {
   placeholder?: string;
   className?: string;
   disabled?: boolean;
+  hasError?: boolean;
 }
 
-export function DatePicker({ value, onChange, placeholder = 'dd/mm/yyyy', className, disabled }: DatePickerProps) {
+export function DatePicker({ value, onChange, placeholder = 'dd/mm/yyyy', className, disabled, hasError }: DatePickerProps) {
   const [open, setOpen] = React.useState(false);
 
   // Parse initial value (could be dd/mm/yyyy, yyyy-mm, yyyy, or empty)
@@ -124,7 +125,7 @@ export function DatePicker({ value, onChange, placeholder = 'dd/mm/yyyy', classN
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         disabled={disabled}
-        className="pr-10"
+        className={cn("pr-10", hasError && 'border-rose-500/80 focus:border-rose-500 focus:ring-rose-500/30')}
       />
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>

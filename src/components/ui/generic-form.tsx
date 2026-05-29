@@ -16,6 +16,7 @@ interface FormContextType {
   pathPrefix: string;
   updateField: (path: string, value: any) => void;
   resumeData: any;
+  validationErrors?: Record<string, string>;
 }
 
 export const FormContext = React.createContext<FormContextType | null>(null);
@@ -35,10 +36,10 @@ export function GenericForm({
   children,
   className,
 }: GenericFormProps): React.ReactElement {
-  const { resumeData, updateField } = useResumeStore();
+  const { resumeData, updateField, validationErrors } = useResumeStore();
 
   return (
-    <FormContext.Provider value={{ pathPrefix, updateField, resumeData }}>
+    <FormContext.Provider value={{ pathPrefix, updateField, resumeData, validationErrors }}>
       <div className={cn('space-y-4', className)}>
         {children}
       </div>
@@ -93,8 +94,9 @@ export function FormTextField({
     throw new Error('FormTextField must be used within a GenericForm component');
   }
 
-  const { pathPrefix, updateField, resumeData } = context;
+  const { pathPrefix, updateField, resumeData, validationErrors } = context;
   const fullPath = pathPrefix ? `${pathPrefix}.${name}` : name;
+  const error = validationErrors?.[fullPath];
   
   const rawValue = lodashGet(resumeData, fullPath);
   const value = isArray && Array.isArray(rawValue) 
@@ -111,6 +113,7 @@ export function FormTextField({
         type={type}
         placeholder={placeholder}
         disabled={disabled}
+        className={cn(error && 'border-rose-500/80 focus:border-rose-500 focus:ring-rose-500/30')}
         value={value}
         onChange={(e) => {
           const val = e.target.value;
@@ -122,6 +125,9 @@ export function FormTextField({
           }
         }}
       />
+      {error && (
+        <p className="text-[11px] text-rose-500 font-medium mt-1 animate-fade-in">{error}</p>
+      )}
     </div>
   );
 }
@@ -154,8 +160,9 @@ export function FormTextArea({
     throw new Error('FormTextArea must be used within a GenericForm component');
   }
 
-  const { pathPrefix, updateField, resumeData } = context;
+  const { pathPrefix, updateField, resumeData, validationErrors } = context;
   const fullPath = pathPrefix ? `${pathPrefix}.${name}` : name;
+  const error = validationErrors?.[fullPath];
   const value = lodashGet(resumeData, fullPath) ?? '';
 
   return (
@@ -171,9 +178,13 @@ export function FormTextArea({
         value={value}
         onChange={(e) => updateField(fullPath, e.target.value)}
         className={cn(
-          'flex min-h-[80px] w-full rounded-xl border border-zinc-800 bg-[#0c0c0e]/50 px-3.5 py-2.5 text-sm text-zinc-150 shadow-inner placeholder:text-zinc-600 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500/50 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300 resize-none'
+          'flex min-h-[80px] w-full rounded-xl border border-zinc-800 bg-[#0c0c0e]/50 px-3.5 py-2.5 text-sm text-zinc-150 shadow-inner placeholder:text-zinc-600 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500/50 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300 resize-none',
+          error && 'border-rose-500/80 focus-visible:border-rose-500 focus-visible:ring-rose-500/30'
         )}
       />
+      {error && (
+        <p className="text-[11px] text-rose-500 font-medium mt-1 animate-fade-in">{error}</p>
+      )}
     </div>
   );
 }
@@ -245,6 +256,7 @@ export interface FormDatePickerProps {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
+  required?: boolean;
 }
 
 export function FormDatePicker({
@@ -253,27 +265,34 @@ export function FormDatePicker({
   placeholder,
   disabled,
   className,
+  required,
 }: FormDatePickerProps): React.ReactElement {
   const context = React.useContext(FormContext);
   if (!context) {
     throw new Error('FormDatePicker must be used within a GenericForm component');
   }
 
-  const { pathPrefix, updateField, resumeData } = context;
+  const { pathPrefix, updateField, resumeData, validationErrors } = context;
   const fullPath = pathPrefix ? `${pathPrefix}.${name}` : name;
+  const error = validationErrors?.[fullPath];
   const value = lodashGet(resumeData, fullPath) ?? '';
 
   return (
     <div className={cn('space-y-1.5', className)}>
       <label className="block text-xs font-medium text-zinc-400 uppercase tracking-wider">
         {label}
+        {required && <span className="text-rose-500 ml-1">*</span>}
       </label>
       <DatePicker
         value={value}
         placeholder={placeholder}
         disabled={disabled}
+        hasError={!!error}
         onChange={(val) => updateField(fullPath, val)}
       />
+      {error && (
+        <p className="text-[11px] text-rose-500 font-medium mt-1 animate-fade-in">{error}</p>
+      )}
     </div>
   );
 }

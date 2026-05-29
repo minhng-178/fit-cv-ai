@@ -65,10 +65,10 @@ export default function ContentPanel(): React.ReactElement {
             
             <GenericForm pathPrefix="personalInfo">
               <FormRow>
-                <FormTextField name="fullName" label="Họ và tên" placeholder="Ví dụ: Nguyễn Văn A" />
+                <FormTextField name="fullName" label="Họ và tên" placeholder="Ví dụ: Nguyễn Văn A" required />
                 <FormTextField name="title" label="Vị trí ứng tuyển" placeholder="Ví dụ: Senior Frontend Engineer" />
-                <FormTextField name="email" label="Email" placeholder="name@example.com" type="email" />
-                <FormTextField name="phone" label="Số điện thoại" placeholder="Ví dụ: +84 901 234 567" />
+                <FormTextField name="email" label="Email" placeholder="name@example.com" type="email" required />
+                <FormTextField name="phone" label="Số điện thoại" placeholder="Ví dụ: +84 901 234 567" required />
                 <FormTextField name="website" label="Website" placeholder="https://mywebsite.com" />
                 <FormTextField name="location" label="Địa chỉ" placeholder="Ví dụ: Quận 1, TP. Hồ Chí Minh" />
                 <FormTextField name="github" label="GitHub" placeholder="github.com/username" />
@@ -113,15 +113,15 @@ export default function ContentPanel(): React.ReactElement {
 
                   <GenericForm pathPrefix={`workExperience.${idx}`}>
                     <FormRow>
-                      <FormTextField name="company" label="Công ty" placeholder="Ví dụ: TechCorp" />
-                      <FormTextField name="position" label="Vị trí / Chức danh" placeholder="Ví dụ: Frontend Lead" />
+                      <FormTextField name="company" label="Công ty" placeholder="Ví dụ: TechCorp" required />
+                      <FormTextField name="position" label="Vị trí / Chức danh" placeholder="Ví dụ: Frontend Lead" required />
                     </FormRow>
 
                     <FormTextField name="location" label="Địa điểm" placeholder="Ví dụ: TP. Hồ Chí Minh" />
 
                     <div className="grid grid-cols-2 gap-4 mt-4">
-                      <FormDatePicker name="startDate" label="Thời gian bắt đầu" placeholder="dd/mm/yyyy" />
-                      <FormDatePicker name="endDate" label="Thời gian kết thúc" placeholder={exp.current ? 'Hiện tại' : 'dd/mm/yyyy'} disabled={exp.current} />
+                      <FormDatePicker name="startDate" label="Thời gian bắt đầu" placeholder="dd/mm/yyyy" required />
+                      <FormDatePicker name="endDate" label="Thời gian kết thúc" placeholder={exp.current ? 'Hiện tại' : 'dd/mm/yyyy'} disabled={exp.current} required={!exp.current} />
                     </div>
 
                     <FormCheckbox
@@ -217,15 +217,15 @@ export default function ContentPanel(): React.ReactElement {
 
                   <GenericForm pathPrefix={`education.${idx}`}>
                     <FormRow>
-                      <FormTextField name="school" label="Trường học / Học viện" placeholder="Ví dụ: Đại học Khoa học Tự nhiên" />
-                      <FormTextField name="degree" label="Bằng cấp" placeholder="Ví dụ: Cử nhân" />
+                      <FormTextField name="school" label="Trường học / Học viện" placeholder="Ví dụ: Đại học Khoa học Tự nhiên" required />
+                      <FormTextField name="degree" label="Bằng cấp" placeholder="Ví dụ: Cử nhân" required />
                     </FormRow>
 
-                    <FormTextField name="fieldOfStudy" label="Chuyên ngành" placeholder="Ví dụ: Khoa học máy tính" />
+                    <FormTextField name="fieldOfStudy" label="Chuyên ngành" placeholder="Ví dụ: Khoa học máy tính" required />
 
                     <div className="grid grid-cols-2 gap-4">
-                      <FormDatePicker name="startDate" label="Thời gian bắt đầu" placeholder="dd/mm/yyyy" />
-                      <FormDatePicker name="endDate" label="Thời gian kết thúc" placeholder="dd/mm/yyyy" />
+                      <FormDatePicker name="startDate" label="Thời gian bắt đầu" placeholder="dd/mm/yyyy" required />
+                      <FormDatePicker name="endDate" label="Thời gian kết thúc" placeholder="dd/mm/yyyy" required />
                     </div>
 
                     <FormTextArea name="description" label="Thành tích / Ghi chú" placeholder="Ví dụ: Tốt nghiệp loại Giỏi, GPA 3.6/4.0..." rows={2} />
@@ -272,7 +272,7 @@ export default function ContentPanel(): React.ReactElement {
 
                   <GenericForm pathPrefix={`skills.${idx}`}>
                     <div className="flex flex-col gap-4">
-                      <FormTextField name="category" label="Tên nhóm kỹ năng" placeholder="Ví dụ: Frontend Frameworks" />
+                      <FormTextField name="category" label="Tên nhóm kỹ năng" placeholder="Ví dụ: Frontend Frameworks" required />
                       <FormSkillSelector
                         name="items"
                         label="Kỹ năng"
@@ -322,8 +322,8 @@ export default function ContentPanel(): React.ReactElement {
 
                   <GenericForm pathPrefix={`projects.${idx}`}>
                     <FormRow>
-                      <FormTextField name="name" label="Tên dự án" placeholder="Ví dụ: FitCV.ai" />
-                      <FormTextField name="role" label="Vai trò" placeholder="Ví dụ: Lead Fullstack Developer" />
+                      <FormTextField name="name" label="Tên dự án" placeholder="Ví dụ: FitCV.ai" required />
+                      <FormTextField name="role" label="Vai trò" placeholder="Ví dụ: Lead Fullstack Developer" required />
                       <FormTextField name="url" label="Đường dẫn (URL)" placeholder="https://github.com/..." />
                     </FormRow>
 
@@ -375,8 +375,8 @@ export default function ContentPanel(): React.ReactElement {
 
                   <GenericForm pathPrefix={`languages.${idx}`}>
                     <FormRow>
-                      <FormTextField name="language" label="Ngôn ngữ" placeholder="Ví dụ: Tiếng Anh" />
-                      <FormTextField name="proficiency" label="Mức độ thành thạo" placeholder="Ví dụ: IELTS 7.0 / Bản xứ" />
+                      <FormTextField name="language" label="Ngôn ngữ" placeholder="Ví dụ: Tiếng Anh" required />
+                      <FormTextField name="proficiency" label="Mức độ thành thạo" placeholder="Ví dụ: IELTS 7.0 / Bản xứ" required />
                     </FormRow>
                   </GenericForm>
                 </div>
@@ -419,9 +419,9 @@ export default function ContentPanel(): React.ReactElement {
 
                   <GenericForm pathPrefix={`certifications.${idx}`}>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <FormTextField name="name" label="Tên chứng chỉ" placeholder="Ví dụ: AWS Certified Practitioner" />
-                      <FormTextField name="issuer" label="Tổ chức cấp" placeholder="Ví dụ: Amazon Web Services" />
-                      <FormDatePicker name="date" label="Ngày cấp" placeholder="dd/mm/yyyy" />
+                      <FormTextField name="name" label="Tên chứng chỉ" placeholder="Ví dụ: AWS Certified Practitioner" required />
+                      <FormTextField name="issuer" label="Tổ chức cấp" placeholder="Ví dụ: Amazon Web Services" required />
+                      <FormDatePicker name="date" label="Ngày cấp" placeholder="dd/mm/yyyy" required />
                     </div>
                   </GenericForm>
                 </div>
