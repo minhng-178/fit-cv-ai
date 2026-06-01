@@ -6,6 +6,12 @@ import {
   ResumeData,
   AiSuggestions,
   AiSuggestionRewrite,
+  WorkExperience,
+  Education,
+  SkillCategory,
+  Project,
+  Language,
+  Certification,
 } from '@/types';
 import { validateResumeData } from '@/lib/validation';
 
@@ -31,7 +37,7 @@ interface ResumeState {
   fetchResume: (resumeId?: string) => Promise<void>;
   saveResume: () => Promise<boolean>;
   importResumeData: (data: ResumeData) => Promise<boolean>;
-  updateField: (path: string, value: any) => void;
+  updateField: (path: string, value: unknown) => void;
   setActiveSection: (section: string) => void;
   setZoomRatio: (ratio: number | ((prev: number) => number)) => void;
   setLanguage: (lang: 'vi' | 'en') => void;
@@ -151,8 +157,8 @@ export const useResumeStore = create<ResumeState>((set, get) => ({
         versionNumber: data.activeVersion?.versionNumber || 1,
         resumeData: data.activeVersion?.content || DEFAULT_RESUME_DATA,
       });
-    } catch (e: any) {
-      console.warn('Could not fetch resume from database, running in Demo/Offline mode. Detail:', e.message || e);
+    } catch (e: unknown) {
+      console.warn('Could not fetch resume from database, running in Demo/Offline mode. Detail:', e instanceof Error ? e.message : e);
       set({
         resumeId: null,
         resumeTitle: '',
@@ -236,7 +242,7 @@ export const useResumeStore = create<ResumeState>((set, get) => ({
   })),
 
   removeWorkExperience: (id) => set(produce((state) => {
-    state.resumeData.workExperience = state.resumeData.workExperience?.filter((x: any) => x.id !== id);
+    state.resumeData.workExperience = state.resumeData.workExperience?.filter((x: WorkExperience) => x.id !== id);
   })),
 
   addEducation: () => set(produce((state) => {
@@ -254,7 +260,7 @@ export const useResumeStore = create<ResumeState>((set, get) => ({
   })),
 
   removeEducation: (id) => set(produce((state) => {
-    state.resumeData.education = state.resumeData.education?.filter((x: any) => x.id !== id);
+    state.resumeData.education = state.resumeData.education?.filter((x: Education) => x.id !== id);
   })),
 
   addSkillCategory: () => set(produce((state) => {
@@ -267,7 +273,7 @@ export const useResumeStore = create<ResumeState>((set, get) => ({
   })),
 
   removeSkillCategory: (id) => set(produce((state) => {
-    state.resumeData.skills = state.resumeData.skills?.filter((x: any) => x.id !== id);
+    state.resumeData.skills = state.resumeData.skills?.filter((x: SkillCategory) => x.id !== id);
   })),
 
   addProject: () => set(produce((state) => {
@@ -283,7 +289,7 @@ export const useResumeStore = create<ResumeState>((set, get) => ({
   })),
 
   removeProject: (id) => set(produce((state) => {
-    state.resumeData.projects = state.resumeData.projects?.filter((x: any) => x.id !== id);
+    state.resumeData.projects = state.resumeData.projects?.filter((x: Project) => x.id !== id);
   })),
 
   addLanguage: () => set(produce((state) => {
@@ -296,7 +302,7 @@ export const useResumeStore = create<ResumeState>((set, get) => ({
   })),
 
   removeLanguage: (id) => set(produce((state) => {
-    state.resumeData.languages = state.resumeData.languages?.filter((x: any) => x.id !== id);
+    state.resumeData.languages = state.resumeData.languages?.filter((x: Language) => x.id !== id);
   })),
 
   addCertification: () => set(produce((state) => {
@@ -310,7 +316,7 @@ export const useResumeStore = create<ResumeState>((set, get) => ({
   })),
 
   removeCertification: (id) => set(produce((state) => {
-    state.resumeData.certifications = state.resumeData.certifications?.filter((x: any) => x.id !== id);
+    state.resumeData.certifications = state.resumeData.certifications?.filter((x: Certification) => x.id !== id);
   })),
 
   // Call Gemini optimize endpoint
@@ -350,7 +356,7 @@ export const useResumeStore = create<ResumeState>((set, get) => ({
     // Try finding by unique ID first (highly reliable for arrays)
     if (itemId && Array.isArray(state.resumeData[section])) {
       const list = state.resumeData[section];
-      const item = list.find((x: any) => x.id === itemId);
+      const item = list.find((x: WorkExperience | Education | SkillCategory | Project | Language | Certification) => x.id === itemId);
 
       if (item) {
         if (keys.includes('description') && Array.isArray(item.description)) {

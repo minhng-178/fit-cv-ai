@@ -142,8 +142,9 @@ LƯU Ý QUAN TRỌNG: Bạn PHẢI tạo tất cả các trường dữ liệu d
       suggestions,
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : 'Đã xảy ra lỗi trong quá trình xử lý AI';
     console.error('Lỗi khi tối ưu hóa CV:', error);
-    return NextResponse.json({ error: error.message || 'Đã xảy ra lỗi trong quá trình xử lý AI' }, { status: 500 });
+    return NextResponse.json({ error: errMsg }, { status: 500 });
   }
 }

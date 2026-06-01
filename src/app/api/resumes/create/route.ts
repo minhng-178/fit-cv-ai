@@ -65,8 +65,9 @@ export async function POST(req: Request) {
     await resume.save();
 
     return NextResponse.json({ resume, version });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : 'Database error';
     console.error('Error creating resume:', error);
-    return NextResponse.json({ error: error.message || 'Database error' }, { status: 500 });
+    return NextResponse.json({ error: errMsg }, { status: 500 });
   }
 }

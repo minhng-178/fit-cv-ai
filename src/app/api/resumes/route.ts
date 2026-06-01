@@ -47,13 +47,15 @@ export async function GET(req: Request) {
     }
 
     return NextResponse.json({ resume, activeVersion });
-  } catch (error: any) {
-    const errorMsg = error.message || '';
+  } catch (error: unknown) {
+    const errorMsg = error instanceof Error ? error.message : '';
     const isDbConnectionError =
-      error.name === 'MongooseServerSelectionError' ||
-      error.name === 'MongoNetworkError' ||
-      errorMsg.includes('ECONNREFUSED') ||
-      errorMsg.includes('selection');
+      (error instanceof Error && (
+        error.name === 'MongooseServerSelectionError' ||
+        error.name === 'MongoNetworkError' ||
+        error.message.includes('ECONNREFUSED') ||
+        error.message.includes('selection')
+      ));
 
     if (isDbConnectionError) {
       console.warn('⚠️ Database connection failed. Returning empty resume for demo/offline mode.');
@@ -105,8 +107,9 @@ export async function POST(req: Request) {
       message: 'Saved successfully',
       version: newVersion,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : 'Database error';
     console.error('Error saving resume version:', error);
-    return NextResponse.json({ error: error.message || 'Database error' }, { status: 500 });
+    return NextResponse.json({ error: errMsg }, { status: 500 });
   }
 }

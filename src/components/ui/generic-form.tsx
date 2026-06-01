@@ -7,6 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { DatePicker } from '@/components/ui/date-picker';
 import { cn } from '@/lib/utils';
 import { get as lodashGet } from 'lodash';
+import { ResumeData } from '@/types';
 
 // =============================================================================
 // FORM CONTEXT
@@ -14,8 +15,8 @@ import { get as lodashGet } from 'lodash';
 
 interface FormContextType {
   pathPrefix: string;
-  updateField: (path: string, value: any) => void;
-  resumeData: any;
+  updateField: (path: string, value: unknown) => void;
+  resumeData: ResumeData;
   validationErrors?: Record<string, string>;
 }
 

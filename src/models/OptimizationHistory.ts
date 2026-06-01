@@ -1,9 +1,10 @@
 import mongoose, { Schema, Document, model, models } from 'mongoose';
+import { AiSuggestions } from '@/types';
 
 export interface IOptimizationHistory extends Document {
   resumeVersionId: mongoose.Types.ObjectId;
   jobDescriptionId: mongoose.Types.ObjectId;
-  suggestions: any;
+  suggestions: AiSuggestions;
   applied: boolean;
   createdAt: Date;
 }

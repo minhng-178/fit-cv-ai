@@ -53,13 +53,15 @@ export async function GET() {
     );
 
     return NextResponse.json({ resumes: resumesWithPreview });
-  } catch (error: any) {
-    const errorMsg = error.message || '';
+  } catch (error: unknown) {
+    const errorMsg = error instanceof Error ? error.message : '';
     const isDbConnectionError =
-      error.name === 'MongooseServerSelectionError' ||
-      error.name === 'MongoNetworkError' ||
-      errorMsg.includes('ECONNREFUSED') ||
-      errorMsg.includes('selection');
+      (error instanceof Error && (
+        error.name === 'MongooseServerSelectionError' ||
+        error.name === 'MongoNetworkError' ||
+        error.message.includes('ECONNREFUSED') ||
+        error.message.includes('selection')
+      ));
 
     if (isDbConnectionError) {
       console.warn('⚠️ Database connection failed. Returning empty list.');

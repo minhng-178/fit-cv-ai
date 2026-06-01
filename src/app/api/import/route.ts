@@ -1,6 +1,15 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
 import { ResumeDataSchema } from '@/lib/gemini/schemas';
+import type {
+  ResumeData,
+  WorkExperience,
+  Education,
+  SkillCategory,
+  Project,
+  Language,
+  Certification,
+} from '@/types';
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
@@ -12,7 +21,7 @@ const generateId = (prefix: string) => {
 export async function POST(req: Request) {
   try {
     const contentType = req.headers.get('content-type') || '';
-    let parsedResumeData: any = null;
+    let parsedResumeData: Partial<ResumeData> | null = null;
 
     const systemInstruction = `Bạn là một hệ thống AI chuyên gia trích xuất dữ liệu CV chất lượng cao. 
 Nhiệm vụ của bạn là phân tích thông tin đầu vào (có thể là file PDF CV hoặc một đoạn văn bản thô từ profile LinkedIn) và chuyển đổi thành cấu trúc JSON chuẩn hóa 100%.
@@ -136,7 +145,7 @@ CHÚ Ý:
 
       // 2. Work Experience
       if (Array.isArray(parsedResumeData.workExperience)) {
-        parsedResumeData.workExperience = parsedResumeData.workExperience.map((exp: any) => ({
+        parsedResumeData.workExperience = parsedResumeData.workExperience.map((exp: WorkExperience) => ({
           ...exp,
           id: exp.id || generateId('exp'),
           startDate: normalizeImportedDate(exp.startDate),
@@ -150,7 +159,7 @@ CHÚ Ý:
 
       // 3. Education
       if (Array.isArray(parsedResumeData.education)) {
-        parsedResumeData.education = parsedResumeData.education.map((edu: any) => ({
+        parsedResumeData.education = parsedResumeData.education.map((edu: Education) => ({
           ...edu,
           id: edu.id || generateId('edu'),
           startDate: normalizeImportedDate(edu.startDate),
@@ -162,7 +171,7 @@ CHÚ Ý:
 
       // 4. Skills
       if (Array.isArray(parsedResumeData.skills)) {
-        parsedResumeData.skills = parsedResumeData.skills.map((sk: any) => ({
+        parsedResumeData.skills = parsedResumeData.skills.map((sk: SkillCategory) => ({
           ...sk,
           id: sk.id || generateId('skill'),
           items: Array.isArray(sk.items) ? sk.items : [sk.items || ''],
@@ -173,7 +182,7 @@ CHÚ Ý:
 
       // 5. Projects
       if (Array.isArray(parsedResumeData.projects)) {
-        parsedResumeData.projects = parsedResumeData.projects.map((proj: any) => ({
+        parsedResumeData.projects = parsedResumeData.projects.map((proj: Project) => ({
           ...proj,
           id: proj.id || generateId('proj'),
           technologies: Array.isArray(proj.technologies) ? proj.technologies : [],
@@ -184,7 +193,7 @@ CHÚ Ý:
 
       // 6. Languages
       if (Array.isArray(parsedResumeData.languages)) {
-        parsedResumeData.languages = parsedResumeData.languages.map((lang: any) => ({
+        parsedResumeData.languages = parsedResumeData.languages.map((lang: Language) => ({
           ...lang,
           id: lang.id || generateId('lang'),
         }));
@@ -194,7 +203,7 @@ CHÚ Ý:
 
       // 7. Certifications
       if (Array.isArray(parsedResumeData.certifications)) {
-        parsedResumeData.certifications = parsedResumeData.certifications.map((cert: any) => ({
+        parsedResumeData.certifications = parsedResumeData.certifications.map((cert: Certification) => ({
           ...cert,
           id: cert.id || generateId('cert'),
           date: normalizeImportedDate(cert.date),
@@ -209,10 +218,11 @@ CHÚ Ý:
       data: parsedResumeData
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : 'Đã xảy ra lỗi hệ thống trong quá trình xử lý AI';
     console.error('Lỗi khi nạp dữ liệu CV:', error);
     return NextResponse.json({ 
-      error: error.message || 'Đã xảy ra lỗi hệ thống trong quá trình xử lý AI' 
+      error: errMsg 
     }, { status: 500 });
   }
 }

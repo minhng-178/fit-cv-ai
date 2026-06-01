@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
       .lean();
 
     return NextResponse.json({ skills });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('[GET /api/skills]', err);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
     );
 
     return NextResponse.json({ skill });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('[POST /api/skills]', err);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
