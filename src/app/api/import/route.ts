@@ -11,8 +11,6 @@ import type {
   Certification,
 } from '@/types';
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
-
 // Helper to generate unique IDs for resume elements to match Zustand store format
 const generateId = (prefix: string) => {
   return `${prefix}-${Math.random().toString(36).substring(2, 9)}`;
@@ -20,6 +18,11 @@ const generateId = (prefix: string) => {
 
 export async function POST(req: Request) {
   try {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json({ error: 'GEMINI_API_KEY is not defined in environment variables' }, { status: 500 });
+    }
+    const ai = new GoogleGenAI({ apiKey });
     const contentType = req.headers.get('content-type') || '';
     let parsedResumeData: Partial<ResumeData> | null = null;
 

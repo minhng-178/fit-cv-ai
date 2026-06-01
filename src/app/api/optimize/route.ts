@@ -6,10 +6,14 @@ import { ResumeVersion } from '@/models/ResumeVersion';
 import { JobDescription } from '@/models/JobDescription';
 import { OptimizationHistory } from '@/models/OptimizationHistory';
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
-
 export async function POST(req: Request) {
   try {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json({ error: 'GEMINI_API_KEY is not defined in environment variables' }, { status: 500 });
+    }
+    const ai = new GoogleGenAI({ apiKey });
+
     await dbConnect();
     const { resumeVersionId, jdText, company, role, language } = await req.json();
 
