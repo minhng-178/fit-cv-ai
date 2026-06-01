@@ -1,26 +1,33 @@
 import { NextResponse } from 'next/server';
+import { auth, currentUser } from '@clerk/nextjs/server';
 import dbConnect from '@/lib/db';
-import { User } from '@/models/User';
+import { getOrCreateUser } from '@/lib/clerk';
 import { Resume } from '@/models/Resume';
 import { ResumeVersion } from '@/models/ResumeVersion';
 
-// POST: Create a brand-new blank resume for the user
+// POST: Create a brand-new blank resume for the authenticated user
 export async function POST(req: Request) {
   try {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     await dbConnect();
 
     const body = await req.json().catch(() => ({}));
     const title = body.title || 'CV Chưa đặt tên';
 
-    // Get or create default user
-    let user = await User.findOne({ email: 'demo@fitcv.ai' });
-    if (!user) {
-      user = await User.create({
-        email: 'demo@fitcv.ai',
-        name: 'Demo User',
-        image: '',
-      });
-    }
+    // Fetch Clerk user profile for email/name/image
+    const clerkUser = await currentUser();
+
+    // Get or create MongoDB user
+    const user = await getOrCreateUser({
+      clerkId: userId,
+      email: clerkUser?.emailAddresses?.[0]?.emailAddress,
+      name: clerkUser?.fullName,
+      image: clerkUser?.imageUrl,
+    });
 
     // Create the Resume document
     const resume = await Resume.create({

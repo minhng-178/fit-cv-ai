@@ -1,12 +1,18 @@
 import { NextResponse } from 'next/server';
+import { auth, currentUser } from '@clerk/nextjs/server';
 import dbConnect from '@/lib/db';
-import { User } from '@/models/User';
+import { getOrCreateUser } from '@/lib/clerk';
 import { Resume, IResume } from '@/models/Resume';
 import { ResumeVersion, IResumeVersion } from '@/models/ResumeVersion';
 
-// GET: Fetch a specific resume by ?id=, or auto-seed legacy fallback
+// GET: Fetch a specific resume by ?id=
 export async function GET(req: Request) {
   try {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     await dbConnect();
 
     const { searchParams } = new URL(req.url);
@@ -25,19 +31,17 @@ export async function GET(req: Request) {
         activeVersion = await ResumeVersion.findById(resume.activeVersionId);
       }
     } else {
-      // Legacy: Get or create a default user + resume (backwards compat)
-      let user = await User.findOne({ email: 'demo@fitcv.ai' });
-      if (!user) {
-        user = await User.create({
-          email: 'demo@fitcv.ai',
-          name: 'Demo User',
-          image: '',
-        });
-      }
+      // No id provided — get or create the MongoDB user and look up their first resume
+      const clerkUser = await currentUser();
+      const user = await getOrCreateUser({
+        clerkId: userId,
+        email: clerkUser?.emailAddresses?.[0]?.emailAddress,
+        name: clerkUser?.fullName,
+        image: clerkUser?.imageUrl,
+      });
 
       resume = await Resume.findOne({ userId: user._id });
       if (!resume) {
-        // No resumes at all — return null so the UI redirects to /resumes
         return NextResponse.json({ resume: null, activeVersion: null });
       }
 
@@ -50,12 +54,12 @@ export async function GET(req: Request) {
   } catch (error: unknown) {
     const errorMsg = error instanceof Error ? error.message : '';
     const isDbConnectionError =
-      (error instanceof Error && (
+      error instanceof Error && (
         error.name === 'MongooseServerSelectionError' ||
         error.name === 'MongoNetworkError' ||
         error.message.includes('ECONNREFUSED') ||
         error.message.includes('selection')
-      ));
+      );
 
     if (isDbConnectionError) {
       console.warn('⚠️ Database connection failed. Returning empty resume for demo/offline mode.');
@@ -74,6 +78,11 @@ export async function GET(req: Request) {
 // POST: Save a new version of the resume.
 export async function POST(req: Request) {
   try {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     await dbConnect();
     const { resumeId, content, tags } = await req.json();
 

@@ -53,9 +53,9 @@ CHÚ Ý:
       const buffer = Buffer.from(bytes);
       const pdfBase64 = buffer.toString('base64');
 
-      // Call Gemini 2.5 Flash with the PDF file
+      // Call Gemini 2.5 Pro with the PDF file
       const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-2.5-pro',
         contents: [
           {
             inlineData: {
@@ -89,9 +89,9 @@ CHÚ Ý:
         return NextResponse.json({ error: 'Nội dung văn bản trống' }, { status: 400 });
       }
 
-      // Call Gemini 2.5 Flash with raw text
+      // Call Gemini 2.5 Pro with raw text
       const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-2.5-pro',
         contents: [
           `Dưới đây là văn bản thô trích xuất từ hồ sơ cá nhân / LinkedIn:
           

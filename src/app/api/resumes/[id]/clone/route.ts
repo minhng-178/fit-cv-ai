@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
+import { auth, currentUser } from '@clerk/nextjs/server';
 import dbConnect from '@/lib/db';
+import { getOrCreateUser } from '@/lib/clerk';
 import { Resume } from '@/models/Resume';
 import { ResumeVersion } from '@/models/ResumeVersion';
 
@@ -9,12 +11,27 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     await dbConnect();
     const { id } = await params;
 
-    const original = await Resume.findById(id);
+    // Get MongoDB user
+    const clerkUser = await currentUser();
+    const user = await getOrCreateUser({
+      clerkId: userId,
+      email: clerkUser?.emailAddresses?.[0]?.emailAddress,
+      name: clerkUser?.fullName,
+      image: clerkUser?.imageUrl,
+    });
+
+    // Only allow cloning resumes that belong to the current user
+    const original = await Resume.findOne({ _id: id, userId: user._id });
     if (!original) {
-      return NextResponse.json({ error: 'Resume not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Resume not found or access denied' }, { status: 404 });
     }
 
     // Get the active version content
@@ -26,9 +43,9 @@ export async function POST(
       }
     }
 
-    // Create the cloned Resume document
+    // Create the cloned Resume document (assigned to the same user)
     const cloned = await Resume.create({
-      userId: original.userId,
+      userId: user._id,
       title: `${original.title} (Bản sao)`,
     });
 

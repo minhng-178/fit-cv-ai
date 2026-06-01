@@ -1,23 +1,30 @@
 import { NextResponse } from 'next/server';
+import { auth, currentUser } from '@clerk/nextjs/server';
 import dbConnect from '@/lib/db';
-import { User } from '@/models/User';
+import { getOrCreateUser } from '@/lib/clerk';
 import { Resume } from '@/models/Resume';
 import { ResumeVersion } from '@/models/ResumeVersion';
 
-// GET: List all resumes for the current user
+// GET: List all resumes for the current authenticated user
 export async function GET() {
   try {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     await dbConnect();
 
-    // Get or create default user
-    let user = await User.findOne({ email: 'demo@fitcv.ai' });
-    if (!user) {
-      user = await User.create({
-        email: 'demo@fitcv.ai',
-        name: 'Demo User',
-        image: '',
-      });
-    }
+    // Fetch Clerk user profile for email/name/image
+    const clerkUser = await currentUser();
+
+    // Get or create the MongoDB user document
+    const user = await getOrCreateUser({
+      clerkId: userId,
+      email: clerkUser?.emailAddresses?.[0]?.emailAddress,
+      name: clerkUser?.fullName,
+      image: clerkUser?.imageUrl,
+    });
 
     // Fetch all resumes for this user
     const resumes = await Resume.find({ userId: user._id }).sort({ updatedAt: -1 });
@@ -56,12 +63,12 @@ export async function GET() {
   } catch (error: unknown) {
     const errorMsg = error instanceof Error ? error.message : '';
     const isDbConnectionError =
-      (error instanceof Error && (
+      error instanceof Error && (
         error.name === 'MongooseServerSelectionError' ||
         error.name === 'MongoNetworkError' ||
         error.message.includes('ECONNREFUSED') ||
         error.message.includes('selection')
-      ));
+      );
 
     if (isDbConnectionError) {
       console.warn('⚠️ Database connection failed. Returning empty list.');
