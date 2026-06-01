@@ -1,4 +1,4 @@
-import { ResumeData } from '@/types/resume';
+import { ResumeData } from '@/types';
 
 // Helper to parse date string formatted as YYYY/MM
 export function parseDateString(val: string): Date | null {

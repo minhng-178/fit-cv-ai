@@ -6,7 +6,7 @@ import {
   ResumeData,
   AiSuggestions,
   AiSuggestionRewrite,
-} from '@/types/resume';
+} from '@/types';
 import { validateResumeData } from '@/lib/validation';
 
 

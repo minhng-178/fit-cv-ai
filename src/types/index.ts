@@ -99,3 +99,21 @@ export interface AiSuggestions {
   suggestedAdditions: AiSuggestionAddition[];
   suggestedRewrites: AiSuggestionRewrite[];
 }
+
+export interface ResumePreview {
+  fullName: string;
+  title: string;
+  location: string;
+  template: string;
+  themeColor: string;
+  versionNumber: number;
+  lastEdited: string;
+}
+
+export interface ResumeCard {
+  _id: string;
+  title: string;
+  updatedAt: string;
+  createdAt: string;
+  preview: ResumePreview | null;
+}

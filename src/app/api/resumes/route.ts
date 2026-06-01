@@ -97,7 +97,7 @@ export async function POST(req: Request) {
     });
 
     // Update the resume to point to this new active version
-    resume.activeVersionId = newVersion._id as any;
+    resume.activeVersionId = newVersion._id;
     resume.updatedAt = new Date();
     await resume.save();
 

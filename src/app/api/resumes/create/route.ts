@@ -61,7 +61,7 @@ export async function POST(req: Request) {
     });
 
     // Link version to resume
-    resume.activeVersionId = version._id as any;
+    resume.activeVersionId = version._id;
     await resume.save();
 
     return NextResponse.json({ resume, version });

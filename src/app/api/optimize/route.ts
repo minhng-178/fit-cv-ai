@@ -132,7 +132,7 @@ LƯU Ý QUAN TRỌNG: Bạn PHẢI tạo tất cả các trường dữ liệu d
     cvVersion.tags = {
       role: role || cvVersion.tags?.role || 'Optimized CV',
       company: company || cvVersion.tags?.company,
-      jdId: jobDescription._id as any,
+      jdId: jobDescription._id,
     };
     await cvVersion.save();
 

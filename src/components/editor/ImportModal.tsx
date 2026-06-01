@@ -1,58 +1,58 @@
-'use client';
+"use client";
 
-import React, { useState, useRef } from 'react';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
+import React, { useState, useRef } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
   DialogDescription,
-  DialogFooter
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { useResumeStore } from '@/store/useResumeStore';
-import { 
-  UploadCloud, 
-  FileText, 
-  Loader2, 
-  CheckCircle2, 
-  AlertCircle, 
-  X, 
-  Clipboard, 
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { useResumeStore } from "@/store/useResumeStore";
+import {
+  UploadCloud,
+  FileText,
+  Loader2,
+  CheckCircle2,
+  AlertCircle,
+  X,
+  Clipboard,
   ArrowRight,
   Briefcase,
   GraduationCap,
-  Sparkles
-} from 'lucide-react';
-import { toast } from 'sonner';
-import apiClient from '@/lib/api-client';
-import { ResumeData } from '@/types/resume';
-import { translations } from '@/lib/i18n/translations';
-import { LinkedinIcon } from '@/assets/icons';
+  Sparkles,
+} from "lucide-react";
+import { toast } from "sonner";
+import apiClient from "@/lib/api-client";
+import { ResumeData } from "@/types";
+import { translations } from "@/lib/i18n/translations";
+import { LinkedinIcon } from "@/assets/icons";
 
 interface ImportModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-type TabType = 'pdf' | 'linkedin';
+type TabType = "pdf" | "linkedin";
 
 export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
   const { importResumeData, language } = useResumeStore();
   const t = translations[language];
-  
+
   // UI Tabs & States
-  const [activeTab, setActiveTab] = useState<TabType>('pdf');
+  const [activeTab, setActiveTab] = useState<TabType>("pdf");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // PDF file upload states
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // LinkedIn text state
-  const [linkedinText, setLinkedinText] = useState('');
+  const [linkedinText, setLinkedinText] = useState("");
 
   // Parsed Resume Preview State
   const [parsedData, setParsedData] = useState<ResumeData | null>(null);
@@ -71,10 +71,10 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(false);
-    
+
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const file = e.dataTransfer.files[0];
-      if (file.type === 'application/pdf') {
+      if (file.type === "application/pdf") {
         setSelectedFile(file);
         setError(null);
       } else {
@@ -93,7 +93,7 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
   // Reset modal states
   const handleReset = () => {
     setSelectedFile(null);
-    setLinkedinText('');
+    setLinkedinText("");
     setError(null);
     setIsLoading(false);
     setParsedData(null);
@@ -111,9 +111,13 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
     setError(null);
 
     try {
-      let responseData: { success: boolean; data?: ResumeData; error?: string } | null = null;
+      let responseData: {
+        success: boolean;
+        data?: ResumeData;
+        error?: string;
+      } | null = null;
 
-      if (activeTab === 'pdf') {
+      if (activeTab === "pdf") {
         if (!selectedFile) {
           setError(t.selectFilePrompt);
           setIsLoading(false);
@@ -121,14 +125,18 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
         }
 
         const formData = new FormData();
-        formData.append('file', selectedFile);
+        formData.append("file", selectedFile);
 
-        const res = await apiClient.post('/api/import', formData, {
+        const res = await apiClient.post("/api/import", formData, {
           headers: {
-            'Content-Type': 'multipart/form-data',
+            "Content-Type": "multipart/form-data",
           },
         });
-        responseData = res.data as { success: boolean; data?: ResumeData; error?: string };
+        responseData = res.data as {
+          success: boolean;
+          data?: ResumeData;
+          error?: string;
+        };
       } else {
         if (!linkedinText.trim()) {
           setError(t.pastePrompt);
@@ -136,10 +144,14 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
           return;
         }
 
-        const res = await apiClient.post('/api/import', {
+        const res = await apiClient.post("/api/import", {
           text: linkedinText,
         });
-        responseData = res.data as { success: boolean; data?: ResumeData; error?: string };
+        responseData = res.data as {
+          success: boolean;
+          data?: ResumeData;
+          error?: string;
+        };
       }
 
       if (responseData && responseData.success && responseData.data) {
@@ -149,11 +161,15 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
         throw new Error(responseData?.error || t.extractError);
       }
     } catch (err: unknown) {
-      console.error('Import error:', err);
+      console.error("Import error:", err);
       let errMsg = t.extractError;
-      if (err && typeof err === 'object') {
-        const typedError = err as { response?: { data?: { error?: string } }; message?: string };
-        errMsg = typedError.response?.data?.error || typedError.message || errMsg;
+      if (err && typeof err === "object") {
+        const typedError = err as {
+          response?: { data?: { error?: string } };
+          message?: string;
+        };
+        errMsg =
+          typedError.response?.data?.error || typedError.message || errMsg;
       }
       setError(errMsg);
       toast.error(t.extractErrorToast);
@@ -165,7 +181,7 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
   // Commit imported data to Zustand store and MongoDB
   const handleApplyData = async () => {
     if (!parsedData) return;
-    
+
     setIsLoading(true);
     try {
       const success = await importResumeData(parsedData);
@@ -186,7 +202,6 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent className="sm:max-w-[600px] border border-border bg-card text-foreground max-h-[85vh] overflow-y-auto flex flex-col p-0">
-        
         {/* Header Section */}
         <DialogHeader className="p-6 pb-4 border-b border-border shrink-0">
           <DialogTitle className="text-xl font-bold flex items-center gap-2 bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
@@ -204,7 +219,10 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
             <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-start gap-2.5">
               <AlertCircle size={18} className="shrink-0 mt-0.5" />
               <div className="text-xs sm:text-sm">
-                <span className="font-bold">{t.language === 'vi' ? 'Lưu ý:' : 'Note:'}</span> {t.overwriteWarning}
+                <span className="font-bold">
+                  {t.language === "vi" ? "Lưu ý:" : "Note:"}
+                </span>{" "}
+                {t.overwriteWarning}
               </div>
             </div>
 
@@ -226,36 +244,59 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
 
               <div className="grid grid-cols-2 gap-3 text-xs text-muted-foreground">
                 <div>
-                  <span className="font-semibold block text-[10px] uppercase text-muted-foreground tracking-wider">Email</span>
-                  {parsedData.personalInfo?.email || 'N/A'}
+                  <span className="font-semibold block text-[10px] uppercase text-muted-foreground tracking-wider">
+                    Email
+                  </span>
+                  {parsedData.personalInfo?.email || "N/A"}
                 </div>
                 <div>
-                  <span className="font-semibold block text-[10px] uppercase text-muted-foreground tracking-wider">{t.phone}</span>
-                  {parsedData.personalInfo?.phone || 'N/A'}
+                  <span className="font-semibold block text-[10px] uppercase text-muted-foreground tracking-wider">
+                    {t.phone}
+                  </span>
+                  {parsedData.personalInfo?.phone || "N/A"}
                 </div>
                 <div className="col-span-2">
-                  <span className="font-semibold block text-[10px] uppercase text-muted-foreground tracking-wider">{t.location}</span>
-                  {parsedData.personalInfo?.location || 'N/A'}
+                  <span className="font-semibold block text-[10px] uppercase text-muted-foreground tracking-wider">
+                    {t.location}
+                  </span>
+                  {parsedData.personalInfo?.location || "N/A"}
                 </div>
               </div>
 
               {/* Work Experience list summary */}
-              {parsedData.workExperience && parsedData.workExperience.length > 0 && (
-                <div className="space-y-1.5 pt-2 border-t border-border/60">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block mb-1">
-                    {t.expSummary} ({parsedData.workExperience.length})
-                  </span>
-                  {parsedData.workExperience.map((exp, idx) => (
-                    <div key={exp.id || idx} className="flex gap-2 items-start text-xs">
-                      <Briefcase size={12} className="text-emerald-500 shrink-0 mt-0.5" />
-                      <div>
-                        <span className="text-foreground font-semibold">{exp.position}</span> {t.language === 'vi' ? 'tại' : 'at'} <span className="text-foreground">{exp.company}</span>
-                        <span className="text-muted-foreground text-[10px] ml-1.5">({exp.startDate} - {exp.endDate === 'Present' ? t.present : exp.endDate})</span>
+              {parsedData.workExperience &&
+                parsedData.workExperience.length > 0 && (
+                  <div className="space-y-1.5 pt-2 border-t border-border/60">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block mb-1">
+                      {t.expSummary} ({parsedData.workExperience.length})
+                    </span>
+                    {parsedData.workExperience.map((exp, idx) => (
+                      <div
+                        key={exp.id || idx}
+                        className="flex gap-2 items-start text-xs"
+                      >
+                        <Briefcase
+                          size={12}
+                          className="text-emerald-500 shrink-0 mt-0.5"
+                        />
+                        <div>
+                          <span className="text-foreground font-semibold">
+                            {exp.position}
+                          </span>{" "}
+                          {t.language === "vi" ? "tại" : "at"}{" "}
+                          <span className="text-foreground">{exp.company}</span>
+                          <span className="text-muted-foreground text-[10px] ml-1.5">
+                            ({exp.startDate} -{" "}
+                            {exp.endDate === "Present"
+                              ? t.present
+                              : exp.endDate}
+                            )
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+                    ))}
+                  </div>
+                )}
 
               {/* Education summary */}
               {parsedData.education && parsedData.education.length > 0 && (
@@ -264,11 +305,25 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
                     {t.eduSummary} ({parsedData.education.length})
                   </span>
                   {parsedData.education.map((edu, idx) => (
-                    <div key={edu.id || idx} className="flex gap-2 items-start text-xs">
-                      <GraduationCap size={12} className="text-emerald-500 shrink-0 mt-0.5" />
+                    <div
+                      key={edu.id || idx}
+                      className="flex gap-2 items-start text-xs"
+                    >
+                      <GraduationCap
+                        size={12}
+                        className="text-emerald-500 shrink-0 mt-0.5"
+                      />
                       <div>
-                        <span className="text-foreground font-semibold">{edu.degree}</span> {t.language === 'vi' ? 'chuyên ngành' : 'in'} <span className="text-foreground">{edu.fieldOfStudy}</span>
-                        <div className="text-muted-foreground text-[10px]">{edu.school} ({edu.startDate} - {edu.endDate})</div>
+                        <span className="text-foreground font-semibold">
+                          {edu.degree}
+                        </span>{" "}
+                        {t.language === "vi" ? "chuyên ngành" : "in"}{" "}
+                        <span className="text-foreground">
+                          {edu.fieldOfStudy}
+                        </span>
+                        <div className="text-muted-foreground text-[10px]">
+                          {edu.school} ({edu.startDate} - {edu.endDate})
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -311,11 +366,14 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
             <div className="flex px-6 bg-muted/30 border-b border-border">
               <button
                 type="button"
-                onClick={() => { setActiveTab('pdf'); setError(null); }}
+                onClick={() => {
+                  setActiveTab("pdf");
+                  setError(null);
+                }}
                 className={`py-3 px-4 font-semibold text-xs sm:text-sm border-b-2 transition-all flex items-center gap-1.5 cursor-pointer ${
-                  activeTab === 'pdf'
-                    ? 'border-emerald-500 text-emerald-400 font-bold'
-                    : 'border-transparent text-muted-foreground hover:text-foreground'
+                  activeTab === "pdf"
+                    ? "border-emerald-500 text-emerald-400 font-bold"
+                    : "border-transparent text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <FileText size={15} />
@@ -323,11 +381,14 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
               </button>
               <button
                 type="button"
-                onClick={() => { setActiveTab('linkedin'); setError(null); }}
+                onClick={() => {
+                  setActiveTab("linkedin");
+                  setError(null);
+                }}
                 className={`py-3 px-4 font-semibold text-xs sm:text-sm border-b-2 transition-all flex items-center gap-1.5 cursor-pointer ${
-                  activeTab === 'linkedin'
-                    ? 'border-emerald-500 text-emerald-400 font-bold'
-                    : 'border-transparent text-muted-foreground hover:text-foreground'
+                  activeTab === "linkedin"
+                    ? "border-emerald-500 text-emerald-400 font-bold"
+                    : "border-transparent text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <LinkedinIcon className="h-[15px] w-[15px] shrink-0" />
@@ -345,7 +406,7 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
               )}
 
               {/* Tab 1: PDF File drag and drop */}
-              {activeTab === 'pdf' && (
+              {activeTab === "pdf" && (
                 <div className="space-y-4">
                   <div
                     onDragOver={handleDragOver}
@@ -354,10 +415,10 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
                     onClick={() => fileInputRef.current?.click()}
                     className={`border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300 ${
                       isDragOver
-                        ? 'border-emerald-500 bg-emerald-500/5'
-                        : selectedFile 
-                          ? 'border-emerald-500/50 bg-emerald-500/5'
-                          : 'border-border bg-muted/10 hover:border-border/80 hover:bg-muted/20'
+                        ? "border-emerald-500 bg-emerald-500/5"
+                        : selectedFile
+                          ? "border-emerald-500/50 bg-emerald-500/5"
+                          : "border-border bg-muted/10 hover:border-border/80 hover:bg-muted/20"
                     }`}
                   >
                     <input
@@ -401,7 +462,9 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
                           <p className="text-sm font-medium text-foreground">
                             {t.dragDropText}
                           </p>
-                          <p className="text-xs text-muted-foreground">{t.pdfMaxSize}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {t.pdfMaxSize}
+                          </p>
                         </div>
                       </div>
                     )}
@@ -424,7 +487,7 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
               )}
 
               {/* Tab 2: LinkedIn raw text paste */}
-              {activeTab === 'linkedin' && (
+              {activeTab === "linkedin" && (
                 <div className="space-y-3 flex flex-col h-full">
                   <div className="flex justify-between items-center text-xs">
                     <label className="font-semibold text-muted-foreground uppercase tracking-wider text-[10px]">
@@ -436,9 +499,17 @@ export default function ImportModal({ isOpen, onClose }: ImportModalProps) {
                         try {
                           const text = await navigator.clipboard.readText();
                           setLinkedinText(text);
-                          toast.success(t.language === 'vi' ? 'Đã dán văn bản từ Clipboard!' : 'Pasted text from Clipboard!');
+                          toast.success(
+                            t.language === "vi"
+                              ? "Đã dán văn bản từ Clipboard!"
+                              : "Pasted text from Clipboard!",
+                          );
                         } catch {
-                          toast.error(t.language === 'vi' ? 'Không thể tự động đọc clipboard. Hãy nhấn Ctrl+V / Cmd+V.' : 'Could not read clipboard. Please press Ctrl+V / Cmd+V.');
+                          toast.error(
+                            t.language === "vi"
+                              ? "Không thể tự động đọc clipboard. Hãy nhấn Ctrl+V / Cmd+V."
+                              : "Could not read clipboard. Please press Ctrl+V / Cmd+V.",
+                          );
                         }
                       }}
                       className="text-muted-foreground hover:text-emerald-500 flex items-center gap-1 transition-colors cursor-pointer"
