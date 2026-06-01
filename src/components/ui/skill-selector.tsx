@@ -6,6 +6,8 @@ import { cn } from '@/lib/utils';
 import apiClient from '@/lib/api-client';
 import { FormContext } from '@/components/ui/generic-form';
 import { get as lodashGet } from 'lodash';
+import { useResumeStore } from '@/store/useResumeStore';
+import { translations } from '@/lib/i18n/translations';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -58,6 +60,11 @@ export function SkillSelector({
   placeholder = 'Tìm hoặc thêm kỹ năng...',
   required,
 }: SkillSelectorProps) {
+  const { language } = useResumeStore();
+  const t = translations[language] || translations.vi;
+
+  const displayLabel = label === 'Kỹ năng' ? t.skills : label;
+  const displayPlaceholder = placeholder === 'Tìm hoặc thêm kỹ năng...' ? t.skillItemsPlaceholder : placeholder;
   const [inputValue, setInputValue] = React.useState('');
   const [isOpen, setIsOpen] = React.useState(false);
   const [suggestions, setSuggestions] = React.useState<SkillOption[]>([]);
@@ -190,9 +197,9 @@ export function SkillSelector({
   return (
     <div className={cn('space-y-1.5 relative', className)} ref={wrapperRef}>
       {/* Label */}
-      {label && (
-        <label className="block text-xs font-medium text-zinc-400 uppercase tracking-wider">
-          {label}
+      {displayLabel && (
+        <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+          {displayLabel}
           {required && <span className="text-rose-500 ml-1">*</span>}
         </label>
       )}
@@ -201,11 +208,11 @@ export function SkillSelector({
       <div
         className={cn(
           'flex flex-wrap gap-1.5 min-h-[42px] w-full rounded-xl',
-          'border border-zinc-800 bg-[#0c0c0e]/50 px-2.5 py-2 pr-8',
+          'border border-input bg-muted/40 px-2.5 py-2 pr-8',
           'shadow-inner transition-all duration-300 cursor-text',
           isOpen
             ? 'border-emerald-500/50 ring-1 ring-emerald-500/30'
-            : 'hover:border-zinc-700'
+            : 'hover:border-border'
         )}
         onClick={() => {
           inputRef.current?.focus();
@@ -228,7 +235,7 @@ export function SkillSelector({
                 removeSkill(skill);
               }}
               className="rounded-full opacity-60 hover:opacity-100 hover:bg-emerald-500/20 transition-all p-0.5 -mr-0.5"
-              aria-label={`Xóa ${skill}`}
+            aria-label={`${t.deleteItem}: ${skill}`}
             >
               <X size={10} />
             </button>
@@ -247,8 +254,8 @@ export function SkillSelector({
           }}
           onFocus={() => setIsOpen(true)}
           onKeyDown={handleKeyDown}
-          placeholder={value.length === 0 ? placeholder : ''}
-          className="flex-1 min-w-[120px] bg-transparent text-sm text-zinc-200 placeholder:text-zinc-600 outline-none border-none"
+          placeholder={value.length === 0 ? displayPlaceholder : ''}
+          className="flex-1 min-w-[120px] bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none border-none"
         />
 
         {/* Right Icon */}
@@ -265,10 +272,20 @@ export function SkillSelector({
       </div>
 
       {/* Hint */}
-      <p className="text-[11px] text-zinc-600 pl-0.5">
-        Nhấn <kbd className="px-1 py-0.5 rounded bg-zinc-800 text-zinc-500 text-[10px]">Enter</kbd> hoặc{' '}
-        <kbd className="px-1 py-0.5 rounded bg-zinc-800 text-zinc-500 text-[10px]">,</kbd> để thêm • Xóa bằng{' '}
-        <kbd className="px-1 py-0.5 rounded bg-zinc-800 text-zinc-500 text-[10px]">Backspace</kbd>
+      <p className="text-[11px] text-muted-foreground pl-0.5">
+        {language === 'vi' ? (
+          <>
+            Nhấn <kbd className="px-1 py-0.5 rounded bg-muted text-muted-foreground text-[10px]">Enter</kbd> hoặc{' '}
+            <kbd className="px-1 py-0.5 rounded bg-muted text-muted-foreground text-[10px]">,</kbd> để thêm • Xóa bằng{' '}
+            <kbd className="px-1 py-0.5 rounded bg-muted text-muted-foreground text-[10px]">Backspace</kbd>
+          </>
+        ) : (
+          <>
+            Press <kbd className="px-1 py-0.5 rounded bg-muted text-muted-foreground text-[10px]">Enter</kbd> or{' '}
+            <kbd className="px-1 py-0.5 rounded bg-muted text-muted-foreground text-[10px]">,</kbd> to add •{' '}
+            <kbd className="px-1 py-0.5 rounded bg-muted text-muted-foreground text-[10px]">Backspace</kbd> to delete
+          </>
+        )}
       </p>
 
       {/* Dropdown */}
@@ -276,22 +293,22 @@ export function SkillSelector({
         <div
           ref={dropdownRef}
           className={cn(
-            'absolute z-50 left-0 right-0 rounded-xl border border-zinc-800',
-            'bg-[#0f0f12] shadow-2xl shadow-black/60 overflow-hidden',
+            'absolute z-50 left-0 right-0 rounded-xl border border-border',
+            'bg-popover text-popover-foreground shadow-2xl shadow-black/60 overflow-hidden',
             'animate-in fade-in-0 zoom-in-95 duration-150'
           )}
         >
           {dropdownItems.length === 0 && !isLoading && (
-            <div className="px-4 py-3 text-sm text-zinc-500 text-center">
+            <div className="px-4 py-3 text-sm text-muted-foreground text-center">
               {inputValue.trim()
-                ? 'Không có trong database — nhấn Enter để thêm mới'
-                : 'Bắt đầu gõ để tìm kiếm kỹ năng...'}
+                ? t.skillSelectorNoDb
+                : t.skillSelectorSearchPrompt}
             </div>
           )}
 
           {isLoading && dropdownItems.length === 0 && (
-            <div className="px-4 py-3 flex items-center justify-center gap-2 text-sm text-zinc-500">
-              <Loader2 size={14} className="animate-spin" /> Đang tìm kiếm...
+            <div className="px-4 py-3 flex items-center justify-center gap-2 text-sm text-muted-foreground">
+              <Loader2 size={14} className="animate-spin" /> {t.skillSelectorSearching}
             </div>
           )}
 
@@ -309,23 +326,23 @@ export function SkillSelector({
                     'w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-left transition-colors duration-100',
                     activeIndex === idx
                       ? 'bg-emerald-500/10 text-emerald-300'
-                      : 'text-zinc-300 hover:bg-zinc-800/60'
+                      : 'text-foreground hover:bg-accent/60'
                   )}
                 >
                   {item._isNew ? (
                     <>
                       <Plus size={13} className="text-emerald-400 shrink-0" />
                       <span>
-                        Thêm mới{' '}
-                        <strong className="text-emerald-400">"{item.name}"</strong>
+                        {t.skillSelectorAddNew}{' '}
+                        <strong className="text-emerald-400">&quot;{item.name}&quot;</strong>
                       </span>
                     </>
                   ) : (
                     <>
-                      <Search size={12} className="text-zinc-600 shrink-0" />
+                      <Search size={12} className="text-muted-foreground shrink-0" />
                       <span className="flex-1">{item.name}</span>
                       {item.category && (
-                        <span className="text-[10px] text-zinc-600 bg-zinc-800 px-1.5 py-0.5 rounded-md shrink-0">
+                        <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded-md shrink-0">
                           {item.category}
                         </span>
                       )}

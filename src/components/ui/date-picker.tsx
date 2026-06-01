@@ -138,14 +138,14 @@ export function DatePicker({ value, onChange, placeholder = 'dd/mm/yyyy', classN
             <CalendarIcon size={15} />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-64 bg-zinc-950 border border-zinc-850 p-3 select-none" align="end">
+        <PopoverContent className="w-64 bg-popover border border-border text-popover-foreground p-3 select-none" align="end">
           {/* Header */}
           <div className="flex justify-between items-center gap-1 mb-3">
             {/* Month Selector */}
             <select
               value={month}
               onChange={(e) => handleMonthChange(parseInt(e.target.value, 10))}
-              className="bg-zinc-900 border border-zinc-850 rounded-lg px-2 py-1 text-xs text-zinc-200 focus:outline-none focus:border-emerald-500 cursor-pointer"
+              className="bg-background border border-input rounded-lg px-2 py-1 text-xs text-foreground focus:outline-none focus:border-emerald-500 cursor-pointer"
             >
               {months.map((m, idx) => (
                 <option key={idx} value={idx}>{m}</option>
@@ -156,7 +156,7 @@ export function DatePicker({ value, onChange, placeholder = 'dd/mm/yyyy', classN
             <select
               value={year}
               onChange={(e) => handleYearChange(parseInt(e.target.value, 10))}
-              className="bg-zinc-900 border border-zinc-850 rounded-lg px-2 py-1 text-xs text-zinc-200 focus:outline-none focus:border-emerald-500 cursor-pointer"
+              className="bg-background border border-input rounded-lg px-2 py-1 text-xs text-foreground focus:outline-none focus:border-emerald-500 cursor-pointer"
             >
               {years.map((y) => (
                 <option key={y} value={y}>{y}</option>
@@ -165,7 +165,7 @@ export function DatePicker({ value, onChange, placeholder = 'dd/mm/yyyy', classN
           </div>
 
           {/* Weekday Labels */}
-          <div className="grid grid-cols-7 gap-1 text-center mb-1 text-[10px] text-zinc-500 font-bold uppercase">
+          <div className="grid grid-cols-7 gap-1 text-center mb-1 text-[10px] text-muted-foreground font-bold uppercase">
             <span>CN</span>
             <span>T2</span>
             <span>T3</span>
@@ -198,10 +198,10 @@ export function DatePicker({ value, onChange, placeholder = 'dd/mm/yyyy', classN
                   className={cn(
                     'h-7 w-7 rounded-lg text-xs font-medium transition-all flex items-center justify-center',
                     isSelected 
-                      ? 'bg-emerald-500 text-zinc-950 font-bold' 
+                      ? 'bg-emerald-500 text-white dark:text-zinc-950 font-bold' 
                       : isToday
                       ? 'border border-emerald-500/50 text-emerald-400 bg-emerald-500/5'
-                      : 'text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100'
+                      : 'text-foreground hover:bg-accent hover:text-accent-foreground'
                   )}
                 >
                   {day}

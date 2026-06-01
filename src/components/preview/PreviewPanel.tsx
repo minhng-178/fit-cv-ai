@@ -5,9 +5,11 @@ import { useResumeStore } from '@/store/useResumeStore';
 import { Button } from '@/components/ui/button';
 import { Globe, Mail, Phone, MapPin, ZoomIn, ZoomOut } from 'lucide-react';
 import { GithubIcon, LinkedinIcon } from '@/assets/icons';
+import { translations } from '@/lib/i18n/translations';
 
 export default function PreviewPanel() {
-  const { resumeData, zoomRatio, setZoomRatio } = useResumeStore();
+  const { resumeData, zoomRatio, setZoomRatio, language } = useResumeStore();
+  const t = translations[language] || translations.vi;
 
   const info = resumeData.personalInfo || {};
   const experiences = resumeData.workExperience || [];
@@ -83,7 +85,7 @@ export default function PreviewPanel() {
     if (!info.summary) return null;
     return (
       <section className="space-y-1.5">
-        <h2 className={`${getFontSizeClass('heading')} font-bold uppercase tracking-widest border-b pb-1 ${colors.text} ${colors.border}`}>Tóm tắt</h2>
+        <h2 className={`${getFontSizeClass('heading')} font-bold uppercase tracking-widest border-b pb-1 ${colors.text} ${colors.border}`}>{t.previewSummary}</h2>
         <p className={`${getFontSizeClass('body')} leading-relaxed text-zinc-700 whitespace-pre-line`}>
           {info.summary}
         </p>
@@ -95,14 +97,14 @@ export default function PreviewPanel() {
     if (experiences.length === 0) return null;
     return (
       <section className="space-y-3">
-        <h2 className={`${getFontSizeClass('heading')} font-bold uppercase tracking-widest border-b pb-1 ${colors.text} ${colors.border}`}>Kinh nghiệm làm việc</h2>
+        <h2 className={`${getFontSizeClass('heading')} font-bold uppercase tracking-widest border-b pb-1 ${colors.text} ${colors.border}`}>{t.previewExperience}</h2>
         <div className="space-y-4">
           {experiences.map((exp) => (
             <div key={exp.id} className="space-y-1">
               <div className="flex justify-between items-baseline">
                 <h3 className={`${getFontSizeClass('item-title')} font-bold text-zinc-900`}>{exp.position}</h3>
                 <span className={`${getFontSizeClass('sub')} text-zinc-500 font-mono shrink-0`}>
-                  {exp.startDate} – {exp.endDate || (exp.current ? 'Present' : '')}
+                  {exp.startDate} – {exp.endDate || (exp.current ? t.present : '')}
                 </span>
               </div>
               <div className={`flex justify-between items-baseline ${getFontSizeClass('sub')} text-zinc-600 font-medium`}>
@@ -127,7 +129,7 @@ export default function PreviewPanel() {
     if (projects.length === 0) return null;
     return (
       <section className="space-y-3">
-        <h2 className={`${getFontSizeClass('heading')} font-bold uppercase tracking-widest border-b pb-1 ${colors.text} ${colors.border}`}>Dự án tiêu biểu</h2>
+        <h2 className={`${getFontSizeClass('heading')} font-bold uppercase tracking-widest border-b pb-1 ${colors.text} ${colors.border}`}>{t.previewProjects}</h2>
         <div className="space-y-3">
           {projects.map((proj) => (
             <div key={proj.id} className="space-y-1">
@@ -141,7 +143,7 @@ export default function PreviewPanel() {
               <p className={`${getFontSizeClass('body')} leading-relaxed text-zinc-700`}>{proj.description}</p>
               {proj.technologies && proj.technologies.length > 0 && (
                 <div className={`${getFontSizeClass('sub')} text-zinc-500`}>
-                  <span className="font-semibold text-zinc-600">Công nghệ: </span>
+                  <span className="font-semibold text-zinc-600">{t.previewTechUsed} </span>
                   {proj.technologies.join(', ')}
                 </div>
               )}
@@ -156,7 +158,7 @@ export default function PreviewPanel() {
     if (educations.length === 0) return null;
     return (
       <section className="space-y-3">
-        <h2 className={`${getFontSizeClass('heading')} font-bold uppercase tracking-widest border-b pb-1 ${colors.text} ${colors.border}`}>Học vấn</h2>
+        <h2 className={`${getFontSizeClass('heading')} font-bold uppercase tracking-widest border-b pb-1 ${colors.text} ${colors.border}`}>{t.previewEducation}</h2>
         <div className="space-y-3">
           {educations.map((edu) => (
             <div key={edu.id} className="space-y-0.5">
@@ -183,7 +185,7 @@ export default function PreviewPanel() {
     if (skills.length === 0) return null;
     return (
       <section className="space-y-2.5">
-        <h2 className={`${getFontSizeClass('heading')} font-bold uppercase tracking-widest border-b pb-1 ${colors.text} ${colors.border}`}>Kỹ năng</h2>
+        <h2 className={`${getFontSizeClass('heading')} font-bold uppercase tracking-widest border-b pb-1 ${colors.text} ${colors.border}`}>{t.previewSkills}</h2>
         <div className="space-y-2">
           {skills.map((sk) => (
             <div key={sk.id} className="space-y-0.5">
@@ -206,7 +208,7 @@ export default function PreviewPanel() {
     if (languages.length === 0) return null;
     return (
       <section className="space-y-2.5">
-        <h2 className={`${getFontSizeClass('heading')} font-bold uppercase tracking-widest border-b pb-1 ${colors.text} ${colors.border}`}>Ngoại ngữ</h2>
+        <h2 className={`${getFontSizeClass('heading')} font-bold uppercase tracking-widest border-b pb-1 ${colors.text} ${colors.border}`}>{t.previewLanguages}</h2>
         <div className="space-y-1.5">
           {languages.map((lang) => (
             <div key={lang.id} className={`${getFontSizeClass('body')} flex justify-between`}>
@@ -223,12 +225,12 @@ export default function PreviewPanel() {
     if (certifications.length === 0) return null;
     return (
       <section className="space-y-2.5">
-        <h2 className={`${getFontSizeClass('heading')} font-bold uppercase tracking-widest border-b pb-1 ${colors.text} ${colors.border}`}>Chứng chỉ</h2>
+        <h2 className={`${getFontSizeClass('heading')} font-bold uppercase tracking-widest border-b pb-1 ${colors.text} ${colors.border}`}>{t.previewCertifications}</h2>
         <div className="space-y-2">
           {certifications.map((cert) => (
             <div key={cert.id} className="space-y-0.5">
               <h4 className={`${getFontSizeClass('sub')} font-bold text-zinc-800 leading-tight`}>{cert.name}</h4>
-              <div className={`flex justify-between ${getFontSizeClass('sub')} text-zinc-500`}>
+              <div className={`flex justify-between ${getFontSizeClass('sub')} text-zinc-550`}>
                 <span>{cert.issuer}</span>
                 <span className="font-mono">{cert.date}</span>
               </div>
@@ -348,10 +350,10 @@ export default function PreviewPanel() {
           {/* Header */}
           <header className={`border-b-2 ${colors.border} pb-5 mb-5`}>
             <h1 className={`${getFontSizeClass('title')} font-bold tracking-tight text-zinc-900 mb-1`}>
-              {info.fullName || 'HỌ VÀ TÊN CỦA BẠN'}
+              {info.fullName || t.previewDefaultName}
             </h1>
             <p className={`${getFontSizeClass('subtitle')} font-medium ${colors.text} mb-3`}>
-              {info.title || 'Vị trí ứng tuyển'}
+              {info.title || t.previewDefaultTitle}
             </p>
             
             {/* Contacts Grid */}

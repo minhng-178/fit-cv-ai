@@ -1,10 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useResumeStore } from '@/store/useResumeStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Sparkles } from 'lucide-react';
 import { 
   GenericForm, 
   FormRow, 
@@ -15,8 +15,11 @@ import {
 } from '@/components/ui/generic-form';
 import { FormSkillSelector } from '@/components/ui/skill-selector';
 import LayoutPanel from './LayoutPanel';
+import ImportModal from './ImportModal';
+import { translations } from '@/lib/i18n/translations';
 
 export default function ContentPanel(): React.ReactElement {
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const {
     resumeData,
     activeSection,
@@ -32,25 +35,28 @@ export default function ContentPanel(): React.ReactElement {
     addLanguage,
     removeLanguage,
     addCertification,
-    removeCertification
+    removeCertification,
+    language
   } = useResumeStore();
 
+  const t = translations[language];
+
   const sections = [
-    { id: 'personalInfo', label: 'Thông tin cá nhân' },
-    { id: 'workExperience', label: 'Kinh nghiệm' },
-    { id: 'education', label: 'Học vấn' },
-    { id: 'skills', label: 'Kỹ năng' },
-    { id: 'projects', label: 'Dự án' },
-    { id: 'languages', label: 'Ngoại ngữ' },
-    { id: 'certifications', label: 'Chứng chỉ' },
-    { id: 'layout', label: 'Bố cục & Giao diện' },
+    { id: 'personalInfo', label: t.personalInfo },
+    { id: 'workExperience', label: t.workExperience },
+    { id: 'education', label: t.education },
+    { id: 'skills', label: t.skills },
+    { id: 'projects', label: t.projects },
+    { id: 'languages', label: t.languages },
+    { id: 'certifications', label: t.certifications },
+    { id: 'layout', label: t.layout },
   ];
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden">
       {/* Section Label Header */}
-      <div className="h-12 border-b border-zinc-800/80 bg-[#0f0f11]/20 px-6 flex items-center shrink-0 select-none">
-        <span className="text-[10px] sm:text-xs text-zinc-400 font-bold uppercase tracking-wider">
+      <div className="h-12 border-b border-border bg-muted/20 px-6 flex items-center shrink-0 select-none">
+        <span className="text-[10px] sm:text-xs text-muted-foreground font-bold uppercase tracking-wider">
           {sections.find((s) => s.id === activeSection)?.label}
         </span>
       </div>
@@ -58,23 +64,37 @@ export default function ContentPanel(): React.ReactElement {
       <div className="flex-1 p-4 sm:p-6 overflow-y-auto h-full max-w-full">
         {activeSection === 'personalInfo' && (
           <div className="space-y-6">
-            <div>
-              <h2 className="text-xl font-bold text-zinc-100 mb-1">Thông tin cá nhân</h2>
-              <p className="text-sm text-zinc-400">Giới thiệu ngắn gọn thông tin liên lạc và định hướng của bạn.</p>
+            <div className="flex justify-between items-start gap-4">
+              <div>
+                <h2 className="text-xl font-bold text-foreground mb-1">{t.personalInfo}</h2>
+                <p className="text-sm text-muted-foreground">
+                  {language === 'vi' 
+                    ? 'Giới thiệu ngắn gọn thông tin liên lạc và định hướng của bạn.' 
+                    : 'Briefly introduce your contact details and professional summary.'}
+                </p>
+              </div>
+              <Button
+                onClick={() => setIsImportModalOpen(true)}
+                variant="outline"
+                size="sm"
+                className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20 flex items-center gap-1.5 shrink-0 animate-pulse hover:animate-none cursor-pointer"
+              >
+                <Sparkles size={14} /> {t.importModalBtn}
+              </Button>
             </div>
             
             <GenericForm pathPrefix="personalInfo">
               <FormRow>
-                <FormTextField name="fullName" label="Họ và tên" placeholder="Ví dụ: Nguyễn Văn A" required />
-                <FormTextField name="title" label="Vị trí ứng tuyển" placeholder="Ví dụ: Senior Frontend Engineer" />
-                <FormTextField name="email" label="Email" placeholder="name@example.com" type="email" required />
-                <FormTextField name="phone" label="Số điện thoại" placeholder="Ví dụ: +84 901 234 567" required />
-                <FormTextField name="website" label="Website" placeholder="https://mywebsite.com" />
-                <FormTextField name="location" label="Địa chỉ" placeholder="Ví dụ: Quận 1, TP. Hồ Chí Minh" />
-                <FormTextField name="github" label="GitHub" placeholder="github.com/username" />
-                <FormTextField name="linkedin" label="LinkedIn" placeholder="linkedin.com/in/username" />
+                <FormTextField name="fullName" label={t.fullName} placeholder={t.fullNamePlaceholder} required />
+                <FormTextField name="title" label={t.jobTitle} placeholder={t.jobTitlePlaceholder} />
+                <FormTextField name="email" label={t.email} placeholder={t.emailPlaceholder} type="email" required />
+                <FormTextField name="phone" label={t.phone} placeholder={t.phonePlaceholder} required />
+                <FormTextField name="website" label={t.website} placeholder={t.websitePlaceholder} />
+                <FormTextField name="location" label={t.location} placeholder={t.locationPlaceholder} />
+                <FormTextField name="github" label={t.github} placeholder={t.githubPlaceholder} />
+                <FormTextField name="linkedin" label={t.linkedin} placeholder={t.linkedinPlaceholder} />
               </FormRow>
-              <FormTextArea name="summary" label="Tóm tắt tiểu sử bản thân" placeholder="Viết một đoạn tóm tắt ngắn làm nổi bật kinh nghiệm và mục tiêu cốt lõi của bạn..." rows={4} />
+              <FormTextArea name="summary" label={t.summary} placeholder={t.summaryPlaceholder} rows={4} />
             </GenericForm>
           </div>
         )}
@@ -83,50 +103,54 @@ export default function ContentPanel(): React.ReactElement {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <div>
-                <h2 className="text-xl font-bold text-zinc-100 mb-1">Kinh nghiệm làm việc</h2>
-                <p className="text-sm text-zinc-400">Trình bày lịch sử làm việc gần đây nhất của bạn.</p>
+                <h2 className="text-xl font-bold text-foreground mb-1">{t.workExperience}</h2>
+                <p className="text-sm text-muted-foreground">
+                  {language === 'vi' 
+                    ? 'Trình bày lịch sử làm việc gần đây nhất của bạn.' 
+                    : 'Describe your recent employment history.'}
+                </p>
               </div>
               <Button
                 onClick={addWorkExperience}
                 variant="outline"
                 size="sm"
-                className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20"
+                className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20 cursor-pointer"
               >
-                <Plus size={14} /> Thêm mới
+                <Plus size={14} /> {t.addNew}
               </Button>
             </div>
 
             <div className="space-y-4">
               {resumeData.workExperience?.map((exp, idx) => (
-                <div key={exp.id} className="p-4 bg-[#0f0f11]/40 border border-zinc-800/80 rounded-xl space-y-4 relative animate-fade-in">
+                <div key={exp.id} className="p-4 bg-muted/10 border border-border rounded-xl space-y-4 relative animate-fade-in">
                   <Button
                     onClick={() => removeWorkExperience(exp.id)}
                     variant="ghost"
                     size="icon"
-                    className="absolute top-4 right-4 text-zinc-500 hover:text-rose-455 hover:bg-transparent h-8 w-8"
-                    title="Xóa công việc này"
+                    className="absolute top-4 right-4 text-muted-foreground hover:text-rose-500 hover:bg-transparent h-8 w-8 cursor-pointer"
+                    title={t.deleteItem}
                   >
                     <Trash2 size={15} />
                   </Button>
 
-                  <h3 className="text-sm font-semibold text-zinc-300">Công việc #{idx + 1}</h3>
+                  <h3 className="text-sm font-semibold text-foreground">{t.jobIndexHeader} #{idx + 1}</h3>
 
                   <GenericForm pathPrefix={`workExperience.${idx}`}>
                     <FormRow>
-                      <FormTextField name="company" label="Công ty" placeholder="Ví dụ: TechCorp" required />
-                      <FormTextField name="position" label="Vị trí / Chức danh" placeholder="Ví dụ: Frontend Lead" required />
+                      <FormTextField name="company" label={t.company} placeholder={t.companyPlaceholder} required />
+                      <FormTextField name="position" label={t.position} placeholder={t.positionPlaceholder} required />
                     </FormRow>
 
-                    <FormTextField name="location" label="Địa điểm" placeholder="Ví dụ: TP. Hồ Chí Minh" />
+                    <FormTextField name="location" label={t.locationLabel} placeholder={t.locationPlaceholder} />
 
                     <div className="grid grid-cols-2 gap-4 mt-4">
-                      <FormDatePicker name="startDate" label="Thời gian bắt đầu" placeholder="dd/mm/yyyy" required />
-                      <FormDatePicker name="endDate" label="Thời gian kết thúc" placeholder={exp.current ? 'Hiện tại' : 'dd/mm/yyyy'} disabled={exp.current} required={!exp.current} />
+                      <FormDatePicker name="startDate" label={t.startDate} placeholder="dd/mm/yyyy" required />
+                      <FormDatePicker name="endDate" label={t.endDate} placeholder={exp.current ? t.present : 'dd/mm/yyyy'} disabled={exp.current} required={!exp.current} />
                     </div>
 
                     <FormCheckbox
                       name="current"
-                      label="Đang làm việc tại đây"
+                      label={t.currentJob}
                       className="mt-2"
                       onCheckedChange={(isChecked) => {
                         if (isChecked) {
@@ -140,7 +164,9 @@ export default function ContentPanel(): React.ReactElement {
 
                   {/* Bullet points for job description */}
                   <div className="space-y-2">
-                    <label className="block text-xs font-medium text-zinc-400 uppercase tracking-wider">Mô tả công việc (Các gạch đầu dòng)</label>
+                    <label className="block text-xs font-medium text-zinc-400 uppercase tracking-wider">
+                      {language === 'vi' ? 'Mô tả công việc (Các gạch đầu dòng)' : 'Job Description (Bullet Points)'}
+                    </label>
                     {exp.description?.map((bullet, bulletIdx) => (
                       <div key={bulletIdx} className="flex gap-2 items-center">
                         <span className="text-zinc-650 text-xs">•</span>
@@ -148,7 +174,7 @@ export default function ContentPanel(): React.ReactElement {
                           type="text"
                           value={bullet}
                           onChange={(e) => updateField(`workExperience.${idx}.description.${bulletIdx}`, e.target.value)}
-                          placeholder="Ví dụ: Đã tái cấu trúc giao diện hệ thống Dashboard..."
+                          placeholder={t.bulletPointPlaceholder}
                         />
                         <Button
                           onClick={() => {
@@ -158,7 +184,7 @@ export default function ContentPanel(): React.ReactElement {
                           }}
                           variant="ghost"
                           size="icon"
-                          className="text-zinc-650 hover:text-rose-455 h-8 w-8 shrink-0 hover:bg-transparent"
+                          className="text-zinc-650 hover:text-rose-455 h-8 w-8 shrink-0 hover:bg-transparent cursor-pointer"
                         >
                           <Trash2 size={14} />
                         </Button>
@@ -170,15 +196,17 @@ export default function ContentPanel(): React.ReactElement {
                         updateField(`workExperience.${idx}.description`, newDesc);
                       }}
                       variant="link"
-                      className="flex items-center gap-1 text-xs text-emerald-400 hover:text-emerald-300 mt-2 font-medium p-0"
+                      className="flex items-center gap-1 text-xs text-emerald-400 hover:text-emerald-300 mt-2 font-medium p-0 cursor-pointer"
                     >
-                      <Plus size={12} /> Thêm gạch đầu dòng
+                      <Plus size={12} /> {t.addBulletPoint}
                     </Button>
                   </div>
                 </div>
               ))}
               {(!resumeData.workExperience || resumeData.workExperience.length === 0) && (
-                <div className="text-center py-8 text-zinc-500 border border-dashed border-zinc-800 rounded-xl">Chưa có thông tin kinh nghiệm. Bấm "Thêm mới".</div>
+                <div className="text-center py-8 text-zinc-500 border border-dashed border-zinc-800 rounded-xl">
+                  {t.noData}
+                </div>
               )}
             </div>
           </div>
@@ -188,52 +216,59 @@ export default function ContentPanel(): React.ReactElement {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <div>
-                <h2 className="text-xl font-bold text-zinc-100 mb-1">Học vấn</h2>
-                <p className="text-sm text-zinc-400">Trình bày lịch sử đào tạo học vấn của bạn.</p>
+                <h2 className="text-xl font-bold text-foreground mb-1">{t.education}</h2>
+                <p className="text-sm text-muted-foreground">
+                  {language === 'vi' 
+                    ? 'Trình bày lịch sử đào tạo học vấn của bạn.' 
+                    : 'List your educational background.'}
+                </p>
               </div>
               <Button
                 onClick={addEducation}
                 variant="outline"
                 size="sm"
-                className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20"
+                className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20 cursor-pointer"
               >
-                <Plus size={14} /> Thêm mới
+                <Plus size={14} /> {t.addNew}
               </Button>
             </div>
 
             <div className="space-y-4">
               {resumeData.education?.map((edu, idx) => (
-                <div key={edu.id} className="p-4 bg-[#0f0f11]/40 border border-zinc-800/80 rounded-xl space-y-4 relative animate-fade-in">
+                <div key={edu.id} className="p-4 bg-muted/10 border border-border rounded-xl space-y-4 relative animate-fade-in">
                   <Button
                     onClick={() => removeEducation(edu.id)}
                     variant="ghost"
                     size="icon"
-                    className="absolute top-4 right-4 text-zinc-500 hover:text-rose-455 hover:bg-transparent h-8 w-8"
+                    className="absolute top-4 right-4 text-muted-foreground hover:text-rose-500 hover:bg-transparent h-8 w-8 cursor-pointer"
+                    title={t.deleteItem}
                   >
                     <Trash2 size={15} />
                   </Button>
 
-                  <h3 className="text-sm font-semibold text-zinc-300">Trường học #{idx + 1}</h3>
+                  <h3 className="text-sm font-semibold text-foreground">{t.schoolIndexHeader} #{idx + 1}</h3>
 
                   <GenericForm pathPrefix={`education.${idx}`}>
                     <FormRow>
-                      <FormTextField name="school" label="Trường học / Học viện" placeholder="Ví dụ: Đại học Khoa học Tự nhiên" required />
-                      <FormTextField name="degree" label="Bằng cấp" placeholder="Ví dụ: Cử nhân" required />
+                      <FormTextField name="school" label={t.school} placeholder={t.schoolPlaceholder} required />
+                      <FormTextField name="degree" label={t.degree} placeholder={t.degreePlaceholder} required />
                     </FormRow>
 
-                    <FormTextField name="fieldOfStudy" label="Chuyên ngành" placeholder="Ví dụ: Khoa học máy tính" required />
+                    <FormTextField name="fieldOfStudy" label={t.fieldOfStudy} placeholder={t.fieldOfStudyPlaceholder} required />
 
                     <div className="grid grid-cols-2 gap-4">
-                      <FormDatePicker name="startDate" label="Thời gian bắt đầu" placeholder="dd/mm/yyyy" required />
-                      <FormDatePicker name="endDate" label="Thời gian kết thúc" placeholder="dd/mm/yyyy" required />
+                      <FormDatePicker name="startDate" label={t.startDate} placeholder="dd/mm/yyyy" required />
+                      <FormDatePicker name="endDate" label={t.endDate} placeholder="dd/mm/yyyy" required />
                     </div>
 
-                    <FormTextArea name="description" label="Thành tích / Ghi chú" placeholder="Ví dụ: Tốt nghiệp loại Giỏi, GPA 3.6/4.0..." rows={2} />
+                    <FormTextArea name="description" label={t.eduDescription} placeholder={t.eduDescriptionPlaceholder} rows={2} />
                   </GenericForm>
                 </div>
               ))}
               {(!resumeData.education || resumeData.education.length === 0) && (
-                <div className="text-center py-8 text-zinc-500 border border-dashed border-zinc-800 rounded-xl">Chưa có thông tin học vấn. Bấm "Thêm mới".</div>
+                <div className="text-center py-8 text-muted-foreground border border-dashed border-border rounded-xl">
+                  {t.noData}
+                </div>
               )}
             </div>
           </div>
@@ -243,47 +278,54 @@ export default function ContentPanel(): React.ReactElement {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <div>
-                <h2 className="text-xl font-bold text-zinc-100 mb-1">Kỹ năng kỹ thuật</h2>
-                <p className="text-sm text-zinc-400">Phân loại kỹ năng để nhà tuyển dụng dễ đánh giá.</p>
+                <h2 className="text-xl font-bold text-foreground mb-1">{t.skills}</h2>
+                <p className="text-sm text-muted-foreground">
+                  {language === 'vi' 
+                    ? 'Phân loại kỹ năng để nhà tuyển dụng dễ đánh giá.' 
+                    : 'Categorize your skills for recruiters to easily evaluate.'}
+                </p>
               </div>
               <Button
                 onClick={addSkillCategory}
                 variant="outline"
                 size="sm"
-                className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20"
+                className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20 cursor-pointer"
               >
-                <Plus size={14} /> Thêm nhóm
+                <Plus size={14} /> {t.addGroup}
               </Button>
             </div>
 
             <div className="space-y-4">
               {resumeData.skills?.map((sk, idx) => (
-                <div key={sk.id} className="p-4 bg-[#0f0f11]/40 border border-zinc-800/80 rounded-xl space-y-4 relative animate-fade-in">
+                <div key={sk.id} className="p-4 bg-muted/10 border border-border rounded-xl space-y-4 relative animate-fade-in">
                   <Button
                     onClick={() => removeSkillCategory(sk.id)}
                     variant="ghost"
                     size="icon"
-                    className="absolute top-4 right-4 text-zinc-500 hover:text-rose-455 hover:bg-transparent h-8 w-8"
+                    className="absolute top-4 right-4 text-muted-foreground hover:text-rose-500 hover:bg-transparent h-8 w-8 cursor-pointer"
+                    title={t.deleteItem}
                   >
                     <Trash2 size={15} />
                   </Button>
 
-                  <h3 className="text-sm font-semibold text-zinc-300">Nhóm #{idx + 1}</h3>
+                  <h3 className="text-sm font-semibold text-foreground">{t.skillsIndexHeader} #{idx + 1}</h3>
 
                   <GenericForm pathPrefix={`skills.${idx}`}>
                     <div className="flex flex-col gap-4">
-                      <FormTextField name="category" label="Tên nhóm kỹ năng" placeholder="Ví dụ: Frontend Frameworks" required />
+                      <FormTextField name="category" label={t.skillCategoryName} placeholder={t.skillCategoryPlaceholder} required />
                       <FormSkillSelector
                         name="items"
-                        label="Kỹ năng"
-                        placeholder="Tìm hoặc thêm kỹ năng..."
+                        label={t.skillItemsLabel}
+                        placeholder={t.skillItemsPlaceholder}
                       />
                     </div>
                   </GenericForm>
                 </div>
               ))}
               {(!resumeData.skills || resumeData.skills.length === 0) && (
-                <div className="text-center py-8 text-zinc-500 border border-dashed border-zinc-800 rounded-xl">Chưa có thông tin kỹ năng. Bấm "Thêm nhóm".</div>
+                <div className="text-center py-8 text-muted-foreground border border-dashed border-border rounded-xl">
+                  {t.noSkills}
+                </div>
               )}
             </div>
           </div>
@@ -293,52 +335,59 @@ export default function ContentPanel(): React.ReactElement {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <div>
-                <h2 className="text-xl font-bold text-zinc-100 mb-1">Dự án cá nhân</h2>
-                <p className="text-sm text-zinc-400">Các sản phẩm hoặc đóng góp mã nguồn mở.</p>
+                <h2 className="text-xl font-bold text-foreground mb-1">{t.projects}</h2>
+                <p className="text-sm text-muted-foreground">
+                  {language === 'vi' 
+                    ? 'Các sản phẩm hoặc đóng góp mã nguồn mở.' 
+                    : 'Showcase your personal products or open source contributions.'}
+                </p>
               </div>
               <Button
                 onClick={addProject}
                 variant="outline"
                 size="sm"
-                className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20"
+                className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20 cursor-pointer"
               >
-                <Plus size={14} /> Thêm mới
+                <Plus size={14} /> {t.addNew}
               </Button>
             </div>
 
             <div className="space-y-4">
               {resumeData.projects?.map((proj, idx) => (
-                <div key={proj.id} className="p-4 bg-[#0f0f11]/40 border border-zinc-800/80 rounded-xl space-y-4 relative animate-fade-in">
+                <div key={proj.id} className="p-4 bg-muted/10 border border-border rounded-xl space-y-4 relative animate-fade-in">
                   <Button
                     onClick={() => removeProject(proj.id)}
                     variant="ghost"
                     size="icon"
-                    className="absolute top-4 right-4 text-zinc-500 hover:text-rose-455 hover:bg-transparent h-8 w-8"
+                    className="absolute top-4 right-4 text-muted-foreground hover:text-rose-500 hover:bg-transparent h-8 w-8 cursor-pointer"
+                    title={t.deleteItem}
                   >
                     <Trash2 size={15} />
                   </Button>
 
-                  <h3 className="text-sm font-semibold text-zinc-300">Dự án #{idx + 1}</h3>
+                  <h3 className="text-sm font-semibold text-foreground">{t.projectIndexHeader} #{idx + 1}</h3>
 
                   <GenericForm pathPrefix={`projects.${idx}`}>
                     <FormRow>
-                      <FormTextField name="name" label="Tên dự án" placeholder="Ví dụ: FitCV.ai" required />
-                      <FormTextField name="role" label="Vai trò" placeholder="Ví dụ: Lead Fullstack Developer" required />
-                      <FormTextField name="url" label="Đường dẫn (URL)" placeholder="https://github.com/..." />
+                      <FormTextField name="name" label={t.projectName} placeholder={t.projectNamePlaceholder} required />
+                      <FormTextField name="role" label={t.projectRole} placeholder={t.projectRolePlaceholder} required />
+                      <FormTextField name="url" label={t.projectUrl} placeholder={t.projectUrlPlaceholder} />
                     </FormRow>
 
                     <FormSkillSelector
                       name="technologies"
-                      label="Công nghệ sử dụng"
-                      placeholder="Tìm hoặc thêm công nghệ..."
+                      label={t.projectTech}
+                      placeholder={t.projectTechPlaceholder}
                     />
 
-                    <FormTextArea name="description" label="Mô tả dự án" placeholder="Mô tả mục tiêu, hành động và kết quả đạt được từ dự án..." rows={3} />
+                    <FormTextArea name="description" label={t.projectDesc} placeholder={t.projectDescPlaceholder} rows={3} />
                   </GenericForm>
                 </div>
               ))}
               {(!resumeData.projects || resumeData.projects.length === 0) && (
-                <div className="text-center py-8 text-zinc-500 border border-dashed border-zinc-800 rounded-xl">Chưa có thông tin dự án. Bấm "Thêm mới".</div>
+                <div className="text-center py-8 text-muted-foreground border border-dashed border-border rounded-xl">
+                  {t.noData}
+                </div>
               )}
             </div>
           </div>
@@ -348,41 +397,48 @@ export default function ContentPanel(): React.ReactElement {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <div>
-                <h2 className="text-xl font-bold text-zinc-100 mb-1">Ngoại ngữ</h2>
-                <p className="text-sm text-zinc-400">Trình độ ngoại ngữ và khả năng giao tiếp.</p>
+                <h2 className="text-xl font-bold text-foreground mb-1">{t.languages}</h2>
+                <p className="text-sm text-muted-foreground">
+                  {language === 'vi' 
+                    ? 'Trình độ ngoại ngữ và khả năng giao tiếp.' 
+                    : 'Your language proficiency and communication skills.'}
+                </p>
               </div>
               <Button
                 onClick={addLanguage}
                 variant="outline"
                 size="sm"
-                className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20"
+                className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20 cursor-pointer"
               >
-                <Plus size={14} /> Thêm mới
+                <Plus size={14} /> {t.addNew}
               </Button>
             </div>
 
             <div className="space-y-4">
               {resumeData.languages?.map((lang, idx) => (
-                <div key={lang.id} className="p-4 bg-[#0f0f11]/40 border border-zinc-800/80 rounded-xl space-y-4 relative animate-fade-in">
+                <div key={lang.id} className="p-4 bg-muted/10 border border-border rounded-xl space-y-4 relative animate-fade-in">
                   <Button
                     onClick={() => removeLanguage(lang.id)}
                     variant="ghost"
                     size="icon"
-                    className="absolute top-4 right-4 text-zinc-500 hover:text-rose-455 hover:bg-transparent h-8 w-8"
+                    className="absolute top-4 right-4 text-muted-foreground hover:text-rose-500 hover:bg-transparent h-8 w-8 cursor-pointer"
+                    title={t.deleteItem}
                   >
                     <Trash2 size={15} />
                   </Button>
 
                   <GenericForm pathPrefix={`languages.${idx}`}>
                     <FormRow>
-                      <FormTextField name="language" label="Ngôn ngữ" placeholder="Ví dụ: Tiếng Anh" required />
-                      <FormTextField name="proficiency" label="Mức độ thành thạo" placeholder="Ví dụ: IELTS 7.0 / Bản xứ" required />
+                      <FormTextField name="language" label={t.langLanguage} placeholder={t.langLanguagePlaceholder} required />
+                      <FormTextField name="proficiency" label={t.langProficiency} placeholder={t.langProficiencyPlaceholder} required />
                     </FormRow>
                   </GenericForm>
                 </div>
               ))}
               {(!resumeData.languages || resumeData.languages.length === 0) && (
-                <div className="text-center py-8 text-zinc-500 border border-dashed border-zinc-800 rounded-xl">Chưa có thông tin ngoại ngữ. Bấm "Thêm mới".</div>
+                <div className="text-center py-8 text-muted-foreground border border-dashed border-border rounded-xl">
+                  {t.noLang}
+                </div>
               )}
             </div>
           </div>
@@ -392,42 +448,49 @@ export default function ContentPanel(): React.ReactElement {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <div>
-                <h2 className="text-xl font-bold text-zinc-100 mb-1">Chứng chỉ</h2>
-                <p className="text-sm text-zinc-400">Các chứng nhận chuyên môn của bạn.</p>
+                <h2 className="text-xl font-bold text-foreground mb-1">{t.certifications}</h2>
+                <p className="text-sm text-muted-foreground">
+                  {language === 'vi' 
+                    ? 'Các chứng nhận chuyên môn của bạn.' 
+                    : 'Your professional certifications.'}
+                </p>
               </div>
               <Button
                 onClick={addCertification}
                 variant="outline"
                 size="sm"
-                className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20"
+                className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20 cursor-pointer"
               >
-                <Plus size={14} /> Thêm mới
+                <Plus size={14} /> {t.addNew}
               </Button>
             </div>
 
             <div className="space-y-4">
               {resumeData.certifications?.map((cert, idx) => (
-                <div key={cert.id} className="p-4 bg-[#0f0f11]/40 border border-zinc-800/80 rounded-xl space-y-4 relative animate-fade-in">
+                <div key={cert.id} className="p-4 bg-muted/10 border border-border rounded-xl space-y-4 relative animate-fade-in">
                   <Button
                     onClick={() => removeCertification(cert.id)}
                     variant="ghost"
                     size="icon"
-                    className="absolute top-4 right-4 text-zinc-500 hover:text-rose-455 hover:bg-transparent h-8 w-8"
+                    className="absolute top-4 right-4 text-muted-foreground hover:text-rose-500 hover:bg-transparent h-8 w-8 cursor-pointer"
+                    title={t.deleteItem}
                   >
                     <Trash2 size={15} />
                   </Button>
 
                   <GenericForm pathPrefix={`certifications.${idx}`}>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <FormTextField name="name" label="Tên chứng chỉ" placeholder="Ví dụ: AWS Certified Practitioner" required />
-                      <FormTextField name="issuer" label="Tổ chức cấp" placeholder="Ví dụ: Amazon Web Services" required />
-                      <FormDatePicker name="date" label="Ngày cấp" placeholder="dd/mm/yyyy" required />
+                      <FormTextField name="name" label={t.certName} placeholder={t.certNamePlaceholder} required />
+                      <FormTextField name="issuer" label={t.certIssuer} placeholder={t.certIssuerPlaceholder} required />
+                      <FormDatePicker name="date" label={t.certDate} placeholder="dd/mm/yyyy" required />
                     </div>
                   </GenericForm>
                 </div>
               ))}
               {(!resumeData.certifications || resumeData.certifications.length === 0) && (
-                <div className="text-center py-8 text-zinc-500 border border-dashed border-zinc-800 rounded-xl">Chưa có thông tin chứng chỉ nào. Bấm "Thêm mới".</div>
+                <div className="text-center py-8 text-muted-foreground border border-dashed border-border rounded-xl">
+                  {t.noCert}
+                </div>
               )}
             </div>
           </div>
@@ -437,6 +500,8 @@ export default function ContentPanel(): React.ReactElement {
           <LayoutPanel />
         )}
       </div>
+
+      <ImportModal isOpen={isImportModalOpen} onClose={() => setIsImportModalOpen(false)} />
     </div>
   );
 }

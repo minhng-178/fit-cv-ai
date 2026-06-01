@@ -16,6 +16,8 @@ import {
   SidebarHeader,
   useSidebar
 } from '@/components/ui/sidebar';
+import { useResumeStore } from '@/store/useResumeStore';
+import { translations } from '@/lib/i18n/translations';
 
 interface EditorSidebarProps {
   activeSection: string;
@@ -23,15 +25,18 @@ interface EditorSidebarProps {
 }
 
 export function EditorSidebar({ activeSection, setActiveSection }: EditorSidebarProps) {
+  const { language } = useResumeStore();
+  const t = translations[language];
+
   const sections = [
-    { id: 'personalInfo', label: 'Thông tin cá nhân', icon: User },
-    { id: 'workExperience', label: 'Kinh nghiệm', icon: Briefcase },
-    { id: 'education', label: 'Học vấn', icon: GraduationCap },
-    { id: 'skills', label: 'Kỹ năng', icon: Code },
-    { id: 'projects', label: 'Dự án', icon: FolderGit2 },
-    { id: 'languages', label: 'Ngoại ngữ', icon: Globe },
-    { id: 'certifications', label: 'Chứng chỉ', icon: Award },
-    { id: 'layout', label: 'Bố cục & Giao diện', icon: Palette },
+    { id: 'personalInfo', label: t.personalInfo, icon: User },
+    { id: 'workExperience', label: t.workExperience, icon: Briefcase },
+    { id: 'education', label: t.education, icon: GraduationCap },
+    { id: 'skills', label: t.skills, icon: Code },
+    { id: 'projects', label: t.projects, icon: FolderGit2 },
+    { id: 'languages', label: t.languages, icon: Globe },
+    { id: 'certifications', label: t.certifications, icon: Award },
+    { id: 'layout', label: t.layout, icon: Palette },
   ];
 
   const { state, toggleSidebar } = useSidebar();
@@ -39,21 +44,21 @@ export function EditorSidebar({ activeSection, setActiveSection }: EditorSidebar
   return (
     <Sidebar 
       collapsible="icon" 
-      className="absolute md:relative left-0 top-0 h-full border-r border-zinc-800/80 bg-[#0f0f11]/30 z-20"
+      className="absolute md:relative left-0 top-0 h-full border-r border-border bg-sidebar z-20"
     >
       {/* Floating Toggle Button on the side border */}
       <button
         type="button"
         onClick={toggleSidebar}
-        className="absolute -right-3 top-5 z-30 bg-zinc-950 text-zinc-400 hover:text-emerald-400 border border-zinc-800 hover:border-emerald-500/50 h-6 w-6 rounded-full flex items-center justify-center transition-all duration-300 shadow-md shadow-black/60 cursor-pointer"
-        title={state === 'expanded' ? 'Thu nhỏ' : 'Mở rộng'}
+        className="absolute -right-3 top-5 z-30 bg-background text-muted-foreground hover:text-emerald-400 border border-border hover:border-emerald-500/50 h-6 w-6 rounded-full flex items-center justify-center transition-all duration-300 shadow-md cursor-pointer"
+        title={state === 'expanded' ? t.collapseSidebar : t.expandSidebar}
       >
         {state === 'expanded' ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
       </button>
 
-      <SidebarHeader className="p-4 border-b border-zinc-800/80 shrink-0">
-        <h3 className="hidden group-data-[collapsible=icon]:!hidden md:block text-xs font-semibold text-zinc-500 uppercase tracking-wider px-2">
-          Các danh mục
+      <SidebarHeader className="p-4 border-b border-border shrink-0">
+        <h3 className="hidden group-data-[collapsible=icon]:!hidden md:block text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2">
+          {t.categoriesHeader}
         </h3>
       </SidebarHeader>
       
@@ -73,7 +78,7 @@ export function EditorSidebar({ activeSection, setActiveSection }: EditorSidebar
                       className={`w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all duration-300 ${
                         isActive 
                           ? 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-400 border-l-4 border-emerald-500 font-medium' 
-                          : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/30'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-accent/30'
                       }`}
                     >
                       <Icon size={18} className="shrink-0" />
@@ -87,8 +92,8 @@ export function EditorSidebar({ activeSection, setActiveSection }: EditorSidebar
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4 border-t border-zinc-800/80 flex items-center justify-center shrink-0">
-        <div className="h-8 w-8 rounded-full border border-zinc-800 flex items-center justify-center bg-zinc-950 font-bold text-zinc-200 text-xs shadow-lg shadow-black/40">
+      <SidebarFooter className="p-4 border-t border-border flex items-center justify-center shrink-0">
+        <div className="h-8 w-8 rounded-full border border-border flex items-center justify-center bg-muted font-bold text-foreground text-xs shadow-sm">
           N
         </div>
       </SidebarFooter>

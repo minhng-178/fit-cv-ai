@@ -25,13 +25,16 @@ interface ResumeState {
   isOptimizing: boolean;
   aiSuggestions: AiSuggestions | null;
   activeSuggestionsApplied: Record<string, boolean>; // track applied suggestions to toggle UI checkmarks
+  language: 'vi' | 'en';
 
   // Actions
   fetchResume: (resumeId?: string) => Promise<void>;
   saveResume: () => Promise<boolean>;
+  importResumeData: (data: ResumeData) => Promise<boolean>;
   updateField: (path: string, value: any) => void;
   setActiveSection: (section: string) => void;
   setZoomRatio: (ratio: number | ((prev: number) => number)) => void;
+  setLanguage: (lang: 'vi' | 'en') => void;
 
   // Array Manipulation Helpers
   addWorkExperience: () => void;
@@ -104,6 +107,7 @@ export const useResumeStore = create<ResumeState>((set, get) => ({
   aiSuggestions: null,
   activeSuggestionsApplied: {},
   validationErrors: {},
+  language: typeof window !== 'undefined' ? (localStorage.getItem('fitcv_lang') as 'vi' | 'en') || 'vi' : 'vi',
 
   setActiveSection: (section) => set({ activeSection: section }),
 
@@ -112,6 +116,13 @@ export const useResumeStore = create<ResumeState>((set, get) => ({
   setZoomRatio: (ratio) => set((state) => ({
     zoomRatio: typeof ratio === 'function' ? ratio(state.zoomRatio) : ratio
   })),
+
+  setLanguage: (lang) => {
+    set({ language: lang });
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('fitcv_lang', lang);
+    }
+  },
 
   // Fetch from Mongoose via API
   fetchResume: async (resumeId?: string) => {
@@ -180,6 +191,18 @@ export const useResumeStore = create<ResumeState>((set, get) => ({
     } finally {
       set({ isSaving: false });
     }
+  },
+
+  importResumeData: async (data) => {
+    set(produce((state) => {
+      const existingLayout = state.resumeData.layout;
+      state.resumeData = {
+        ...data,
+        layout: data.layout || existingLayout || DEFAULT_RESUME_DATA.layout,
+      };
+    }));
+    const success = await get().saveResume();
+    return success;
   },
 
   // Update a single nested field (g.e., 'personalInfo.fullName')
@@ -292,7 +315,7 @@ export const useResumeStore = create<ResumeState>((set, get) => ({
 
   // Call Gemini optimize endpoint
   runAiOptimization: async (jdText, company, role) => {
-    const { versionId } = get();
+    const { versionId, language } = get();
     if (!versionId) return;
 
     set({ isOptimizing: true });
@@ -302,6 +325,7 @@ export const useResumeStore = create<ResumeState>((set, get) => ({
         jdText,
         company,
         role,
+        language,
       });
       const data = res.data;
       set({

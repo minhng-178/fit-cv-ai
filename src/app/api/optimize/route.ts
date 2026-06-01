@@ -11,7 +11,7 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 export async function POST(req: Request) {
   try {
     await dbConnect();
-    const { resumeVersionId, jdText, company, role } = await req.json();
+    const { resumeVersionId, jdText, company, role, language } = await req.json();
 
     if (!resumeVersionId || !jdText) {
       return NextResponse.json({ error: 'Missing resumeVersionId or jdText' }, { status: 400 });
@@ -45,7 +45,29 @@ export async function POST(req: Request) {
     };
 
     // 4. Construct System Instruction and User Prompt
-    const systemInstruction = `Bạn là một chuyên gia tuyển dụng (HR Recruiter) cấp cao và chuyên gia tối ưu hóa CV chuyên nghiệp. 
+    const isEnglish = language === 'en';
+    const systemInstruction = isEnglish
+      ? `You are a senior recruitment expert (HR Recruiter) and professional CV optimizer.
+Your task is to analyze the candidate's current CV (provided in JSON format) against the provided Job Description (JD) to give specific improvement suggestions to help the CV pass Applicant Tracking Systems (ATS) and make a strong impression on interviewers.
+
+### ANALYSIS PRINCIPLES:
+1. Real suitability assessment (0-100 score): Based on the number of hard skills, years of experience, and role requirements in the JD compared to the CV.
+2. Keyword Search: Identify technologies, professional skills, certifications in the JD that the CV does not currently have or does not emphasize strongly enough.
+3. Smart Rewrite:
+   - Target sections: Professional summary (\`personalInfo.summary\`), Work experience (\`workExperience.description\`), and Projects (\`projects.description\`).
+   - Use professional action verbs (select from the action keywords in the JD).
+   - Design the rewritten sentence according to the **STAR (Situation, Task, Action, Result)** formula: Contains context, specific action, technology used, and quantitative result (e.g., increased performance by 30%, reduced cost by 15%).
+   - Truth preservation: Optimize the writing style, do not fabricate unreasonable/excessive experience metrics if not related to the old description.
+
+### JSON PATH IDENTIFICATION DIRECTIVE:
+When suggesting rewrites in the \`suggestedRewrites\` array, you must provide the exact \`path\` and \`itemId\` of the corresponding field in the input CV JSON:
+- If modifying the summary: \`path\` = "personalInfo.summary", \`itemId\` = "" (or empty).
+- If modifying the first bullet point of the first job: \`path\` = "workExperience.0.description.0", \`itemId\` = "[id_of_that_work_experience]".
+- If modifying the second project description: \`path\` = "projects.1.description", \`itemId\` = "[id_of_that_project]".
+
+### OUTPUT LANGUAGE INSTRUCTION:
+IMPORTANT: You MUST generate all text-based fields in the JSON response (including 'analysisSummary', 'missingKeywords', 'reasoning', 'suggestedText', 'content') in English.`
+      : `Bạn là một chuyên gia tuyển dụng (HR Recruiter) cấp cao và chuyên gia tối ưu hóa CV chuyên nghiệp. 
 Nhiệm vụ của bạn là phân tích CV hiện tại của ứng viên (được cung cấp dưới dạng JSON) đối chiếu với Job Description (JD - Mô tả công việc) được cung cấp, để đưa ra những đề xuất cải thiện cụ thể giúp CV vượt qua các hệ thống lọc hồ sơ tự động (ATS) và ghi điểm mạnh mẽ với người phỏng vấn.
 
 ### NGUYÊN TẮC PHÂN TÍCH:
@@ -61,7 +83,10 @@ Nhiệm vụ của bạn là phân tích CV hiện tại của ứng viên (đư
 Khi đề xuất viết lại trong mảng \`suggestedRewrites\`, bạn phải cung cấp chính xác \`path\` và \`itemId\` của trường dữ liệu tương ứng trong CV JSON đầu vào:
 - Nếu sửa phần summary: \`path\` = "personalInfo.summary", \`itemId\` = "" (hoặc rỗng).
 - Nếu sửa bullet point thứ nhất của công việc đầu tiên: \`path\` = "workExperience.0.description.0", \`itemId\` = "[id_cua_work_experience_do]".
-- Nếu sửa mô tả dự án thứ hai: \`path\` = "projects.1.description", \`itemId\` = "[id_cua_project_do]".`;
+- Nếu sửa mô tả dự án thứ hai: \`path\` = "projects.1.description", \`itemId\` = "[id_cua_project_do]".
+
+### HƯỚNG DẪN NGÔN NGỮ ĐẦU RA:
+LƯU Ý QUAN TRỌNG: Bạn PHẢI tạo tất cả các trường dữ liệu dạng văn bản trong phản hồi JSON (bao gồm 'analysisSummary', 'missingKeywords', 'reasoning', 'suggestedText', 'content') bằng tiếng Việt.`;
 
     const userPrompt = `
       Hãy đối chiếu CV và JD sau đây để thực hiện tối ưu hóa:

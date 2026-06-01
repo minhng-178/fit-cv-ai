@@ -17,6 +17,7 @@ import {
   Copy,
   Check,
   X,
+  Globe,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -25,6 +26,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu';
 import {
   AlertDialog,
@@ -36,6 +38,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { useResumeStore } from '@/store/useResumeStore';
+import { translations } from '@/lib/i18n/translations';
 
 interface ResumePreview {
   fullName: string;
@@ -63,7 +68,7 @@ const THEME_COLORS: Record<string, string> = {
   slate: '#64748b',
 };
 
-function timeAgo(dateStr: string): string {
+function timeAgo(dateStr: string, language: 'vi' | 'en' = 'vi', t: any): string {
   const date = new Date(dateStr);
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
@@ -71,11 +76,11 @@ function timeAgo(dateStr: string): string {
   const diffHours = Math.floor(diffMs / 3600000);
   const diffDays = Math.floor(diffMs / 86400000);
 
-  if (diffMins < 1) return 'Vừa xong';
-  if (diffMins < 60) return `${diffMins} phút trước`;
-  if (diffHours < 24) return `${diffHours} giờ trước`;
-  if (diffDays < 30) return `${diffDays} ngày trước`;
-  return date.toLocaleDateString('vi-VN');
+  if (diffMins < 1) return t.timeJustNow;
+  if (diffMins < 60) return `${diffMins} ${t.timeMinutesAgo}`;
+  if (diffHours < 24) return `${diffHours} ${t.timeHoursAgo}`;
+  if (diffDays < 30) return `${diffDays} ${t.timeDaysAgo}`;
+  return date.toLocaleDateString(language === 'en' ? 'en-US' : 'vi-VN');
 }
 
 function MiniCVPreview({ themeColor }: { themeColor: string }) {
@@ -138,6 +143,8 @@ interface RenameModalProps {
 }
 
 function RenameModal({ currentTitle, onConfirm, onCancel }: RenameModalProps) {
+  const { language } = useResumeStore();
+  const t = translations[language] || translations.vi;
   const [value, setValue] = useState(currentTitle);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -162,29 +169,29 @@ function RenameModal({ currentTitle, onConfirm, onCancel }: RenameModalProps) {
       onClick={onCancel}
     >
       <div
-        className="bg-zinc-900 border border-zinc-700 rounded-2xl shadow-2xl shadow-black/60 w-full max-w-sm mx-4 overflow-hidden"
+        className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal header */}
-        <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-zinc-800">
+        <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-border">
           <div className="flex items-center gap-2.5">
             <div className="h-7 w-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
               <Pencil size={13} className="text-emerald-400" />
             </div>
-            <h2 className="text-sm font-semibold text-zinc-100">Đổi tên CV</h2>
+            <h2 className="text-sm font-semibold text-foreground">{t.renameCv}</h2>
           </div>
           <button
             onClick={onCancel}
-            className="h-7 w-7 rounded-lg hover:bg-zinc-800 flex items-center justify-center transition-colors"
+            className="h-7 w-7 rounded-lg hover:bg-muted flex items-center justify-center transition-colors"
           >
-            <X size={14} className="text-zinc-500" />
+            <X size={14} className="text-muted-foreground" />
           </button>
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="px-5 py-4 space-y-4">
           <div>
-            <label className="block text-xs font-medium text-zinc-400 mb-1.5">Tên CV</label>
+            <label className="block text-xs font-medium text-muted-foreground mb-1.5">{t.cvNameLabel}</label>
             <input
               ref={inputRef}
               type="text"
@@ -192,8 +199,8 @@ function RenameModal({ currentTitle, onConfirm, onCancel }: RenameModalProps) {
               onChange={(e) => setValue(e.target.value)}
               onKeyDown={handleKeyDown}
               maxLength={80}
-              placeholder="Nhập tên CV..."
-              className="w-full bg-zinc-800 border border-zinc-700 focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/20 rounded-xl px-3.5 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 outline-none transition-all"
+              placeholder={t.cvNamePlaceholder}
+              className="w-full bg-background border border-border focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/20 rounded-xl px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-all"
             />
           </div>
 
@@ -201,17 +208,17 @@ function RenameModal({ currentTitle, onConfirm, onCancel }: RenameModalProps) {
             <button
               type="button"
               onClick={onCancel}
-              className="h-9 px-4 rounded-xl text-sm font-medium text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition-colors"
+              className="h-9 px-4 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
             >
-              Hủy
+              {t.cancel}
             </button>
             <button
               type="submit"
               disabled={!value.trim() || value.trim() === currentTitle}
-              className="h-9 px-4 rounded-xl text-sm font-semibold bg-emerald-500 hover:bg-emerald-400 text-zinc-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+              className="h-9 px-4 rounded-xl text-sm font-semibold bg-emerald-500 hover:bg-emerald-400 text-white dark:text-zinc-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
             >
               <Check size={13} />
-              Lưu
+              {t.save}
             </button>
           </div>
         </form>
@@ -223,6 +230,8 @@ function RenameModal({ currentTitle, onConfirm, onCancel }: RenameModalProps) {
 // ── Main Page ────────────────────────────────────────────────────────────────
 export default function ResumesPage() {
   const router = useRouter();
+  const { language, setLanguage } = useResumeStore();
+  const t = translations[language] || translations.vi;
   const [resumes, setResumes] = useState<ResumeCard[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
@@ -256,12 +265,12 @@ export default function ResumesPage() {
   const handleCreateNew = async () => {
     setIsCreating(true);
     try {
-      const res = await apiClient.post('/api/resumes/create', { title: 'CV Chưa đặt tên' });
+      const res = await apiClient.post('/api/resumes/create', { title: t.untitledCv });
       router.push(`/?id=${res.data.resume._id}`);
-      toast.success('Đã tạo CV mới thành công!');
+      toast.success(t.toastCreateSuccess);
     } catch (e: any) {
       console.error('Error creating resume:', e);
-      toast.error('Không thể tạo CV mới. Vui lòng thử lại.');
+      toast.error(t.toastCreateError);
       setIsCreating(false);
     }
   };
@@ -274,12 +283,12 @@ export default function ResumesPage() {
     try {
       await apiClient.patch(`/api/resumes/${renameTarget._id}`, { title: newTitle });
       setResumes((prev) =>
-        prev.map((r) => (r._id === renameTarget._id ? { ...r, title: newTitle } : r))
+          prev.map((r) => (r._id === renameTarget._id ? { ...r, title: newTitle } : r))
       );
-      toast.success('Đổi tên CV thành công!');
+      toast.success(t.toastRenameSuccess);
     } catch (e: any) {
       console.error('Error renaming resume:', e);
-      toast.error('Không thể đổi tên CV. Vui lòng thử lại.');
+      toast.error(t.toastRenameError);
     } finally {
       setIsSavingRename(false);
       setRenameTarget(null);
@@ -299,10 +308,10 @@ export default function ResumesPage() {
         preview: null, // will show generic skeleton
       };
       setResumes((prev) => [cloned, ...prev]);
-      toast.success('Nhân bản CV thành công!');
+      toast.success(t.toastCloneSuccess);
     } catch (e: any) {
       console.error('Error cloning resume:', e);
-      toast.error('Không thể sao chép CV. Vui lòng thử lại.');
+      toast.error(t.toastCloneError);
     } finally {
       setCloningId(null);
     }
@@ -314,10 +323,10 @@ export default function ResumesPage() {
     try {
       await apiClient.delete(`/api/resumes/${id}`);
       setResumes((prev) => prev.filter((r) => r._id !== id));
-      toast.success('Đã xóa CV thành công!');
+      toast.success(t.toastDeleteSuccess);
     } catch (e: any) {
       console.error('Error deleting resume:', e);
-      toast.error('Không thể xóa CV. Vui lòng thử lại.');
+      toast.error(t.toastDeleteError);
     } finally {
       setDeletingId(null);
     }
@@ -325,7 +334,7 @@ export default function ResumesPage() {
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-100 flex flex-col">
+    <div className="min-h-screen bg-background text-foreground flex flex-col">
       {/* Rename Modal */}
       {renameTarget && (
         <RenameModal
@@ -336,30 +345,53 @@ export default function ResumesPage() {
       )}
 
       {/* Header */}
-      <header className="h-16 border-b border-zinc-800/80 bg-[#0c0c0e]/80 backdrop-blur-xl px-6 flex items-center justify-between shrink-0 select-none z-10">
+      <header className="h-16 border-b border-border bg-card/85 backdrop-blur-xl px-6 flex items-center justify-between shrink-0 select-none z-10">
         <div className="flex items-center gap-2.5">
           <div className="h-8 w-8 rounded-lg bg-gradient-to-tr from-emerald-500 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">
             <Sparkles size={16} className="text-zinc-950 font-bold" />
           </div>
-          <span className="text-base font-bold tracking-tight bg-gradient-to-r from-zinc-100 to-zinc-400 bg-clip-text text-transparent">
+          <span className="text-base font-bold tracking-tight text-foreground">
             FitCV.ai
           </span>
         </div>
 
-        <nav className="flex items-center gap-1 text-sm text-zinc-400">
-          <button className="px-3 py-1.5 rounded-lg bg-zinc-800/80 text-zinc-100 font-medium">
-            CV của tôi
-          </button>
-        </nav>
+        <div className="flex items-center gap-4">
+          <nav className="flex items-center gap-1 text-sm text-muted-foreground">
+            <button className="px-3 py-1.5 rounded-lg bg-muted text-foreground font-medium">
+              {t.myCvs}
+            </button>
+          </nav>
+
+          {/* Language Selector */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-accent border border-transparent hover:border-border rounded-xl cursor-pointer" title={t.language}>
+                <Globe size={15} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-40">
+              <DropdownMenuLabel className="text-zinc-500 text-[10px] uppercase font-bold tracking-wider">{t.language}</DropdownMenuLabel>
+              <DropdownMenuSeparator className="bg-zinc-850" />
+              <DropdownMenuItem onClick={() => setLanguage('vi')} className="flex items-center justify-between cursor-pointer focus:bg-zinc-900 focus:text-zinc-100 text-xs py-2 px-3">
+                <span>Tiếng Việt</span>
+                {language === 'vi' && <Check size={14} className="text-emerald-400" />}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setLanguage('en')} className="flex items-center justify-between cursor-pointer focus:bg-zinc-900 focus:text-zinc-100 text-xs py-2 px-3">
+                <span>English</span>
+                {language === 'en' && <Check size={14} className="text-emerald-400" />}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </header>
 
       {/* Main Content */}
       <main className="flex-1 max-w-6xl mx-auto w-full px-6 py-10">
         {/* Page Title */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-zinc-100 mb-1.5">CV của tôi</h1>
-          <p className="text-zinc-400 text-sm">
-            Tạo và quản lý nhiều phiên bản CV được tối ưu hóa cho từng vị trí ứng tuyển.
+          <h1 className="text-3xl font-bold text-foreground mb-1.5">{t.dashboardTitle}</h1>
+          <p className="text-muted-foreground text-sm">
+            {t.dashboardDesc}
           </p>
         </div>
 
@@ -368,7 +400,7 @@ export default function ResumesPage() {
           <div className="mb-6 flex items-center gap-3 px-4 py-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 text-sm">
             <AlertCircle size={16} className="shrink-0" />
             <span>
-              Không thể kết nối tới cơ sở dữ liệu. Đang chạy ở chế độ Offline — dữ liệu sẽ không được lưu.
+              {t.offlineWarning}
             </span>
           </div>
         )}
@@ -377,7 +409,7 @@ export default function ResumesPage() {
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-24 gap-3">
             <Loader2 size={32} className="animate-spin text-emerald-500" />
-            <p className="text-zinc-500 text-sm animate-pulse">Đang tải danh sách CV...</p>
+            <p className="text-muted-foreground text-sm animate-pulse">{t.loadingResumes}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
@@ -386,21 +418,21 @@ export default function ResumesPage() {
               id="btn-create-new-resume"
               onClick={handleCreateNew}
               disabled={isCreating}
-              className="group relative flex flex-col items-center justify-center gap-3 h-72 rounded-2xl border-2 border-dashed border-zinc-700 hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all duration-300 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+              className="group relative flex flex-col items-center justify-center gap-3 h-72 rounded-2xl border-2 border-dashed border-border hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all duration-300 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {isCreating ? (
                 <Loader2 size={28} className="animate-spin text-emerald-500" />
               ) : (
-                <div className="h-12 w-12 rounded-xl bg-zinc-800 group-hover:bg-emerald-500/10 border border-zinc-700 group-hover:border-emerald-500/30 flex items-center justify-center transition-all duration-300">
-                  <Plus size={22} className="text-zinc-400 group-hover:text-emerald-400 transition-colors duration-300" />
+                <div className="h-12 w-12 rounded-xl bg-muted group-hover:bg-emerald-500/10 border border-border group-hover:border-emerald-500/30 flex items-center justify-center transition-all duration-300">
+                  <Plus size={22} className="text-muted-foreground group-hover:text-emerald-500 transition-colors duration-300" />
                 </div>
               )}
               <div className="text-center">
-                <p className="text-sm font-semibold text-zinc-300 group-hover:text-emerald-400 transition-colors duration-300">
-                  {isCreating ? 'Đang tạo...' : 'Tạo CV mới'}
+                <p className="text-sm font-semibold text-foreground group-hover:text-emerald-500 transition-colors duration-300">
+                  {isCreating ? t.creating : t.createNewCv}
                 </p>
-                <p className="text-xs text-zinc-600 mt-0.5 group-hover:text-zinc-500 transition-colors">
-                  Bắt đầu từ đầu
+                <p className="text-xs text-muted-foreground mt-0.5 group-hover:text-muted-foreground/80 transition-colors">
+                  {t.startFromScratch}
                 </p>
               </div>
             </button>
@@ -415,21 +447,21 @@ export default function ResumesPage() {
               return (
                 <div
                   key={resume._id}
-                  className="group relative flex flex-col rounded-2xl border border-zinc-800 bg-zinc-900/50 hover:border-zinc-700 hover:bg-zinc-900 transition-all duration-300 overflow-hidden cursor-pointer"
+                  className="group relative flex flex-col rounded-2xl border border-border bg-card hover:border-border/80 hover:bg-accent/10 transition-all duration-300 overflow-hidden cursor-pointer"
                   onClick={() => !isBusy && handleOpenResume(resume._id)}
                   style={{ height: '288px' }}
                 >
                   {/* CV Mini Preview */}
                   <div className="flex-1 p-3 overflow-hidden">
-                    <div className="w-full h-full rounded-lg overflow-hidden border border-zinc-800 group-hover:border-zinc-700 transition-colors duration-300 shadow-inner">
+                    <div className="w-full h-full rounded-lg overflow-hidden border border-border group-hover:border-border/80 transition-colors duration-300 shadow-inner">
                       {isBusy ? (
-                        <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-zinc-950">
+                        <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-background">
                           <Loader2
                             size={20}
-                            className={`animate-spin ${isDeleting ? 'text-rose-400' : 'text-sky-400'}`}
+                            className={`animate-spin ${isDeleting ? 'text-rose-450' : 'text-sky-450'}`}
                           />
-                          <span className="text-[11px] text-zinc-600">
-                            {isDeleting ? 'Đang xóa...' : 'Đang sao chép...'}
+                          <span className="text-[11px] text-muted-foreground">
+                            {isDeleting ? t.deleting : t.cloning}
                           </span>
                         </div>
                       ) : (
@@ -440,25 +472,25 @@ export default function ResumesPage() {
 
                   {/* Card Footer */}
                   <div
-                    className="px-3.5 py-2.5 border-t border-zinc-800 flex items-center justify-between gap-2"
+                    className="px-3.5 py-2.5 border-t border-border flex items-center justify-between gap-2"
                     style={{ borderTopColor: color + '25' }}
                   >
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5 mb-0.5">
                         <div className="h-2 w-2 rounded-full shrink-0" style={{ backgroundColor: color }} />
-                        <p className="text-sm font-semibold text-zinc-100 truncate leading-tight">
+                        <p className="text-sm font-semibold text-foreground truncate leading-tight">
                           {resume.title}
                         </p>
                       </div>
-                      <div className="flex items-center gap-2 text-zinc-500">
+                      <div className="flex items-center gap-2 text-muted-foreground">
                         {resume.preview?.fullName && (
                           <>
-                            <span className="text-[11px] truncate text-zinc-400 max-w-[80px]">{resume.preview.fullName}</span>
+                            <span className="text-[11px] truncate text-muted-foreground max-w-[80px]">{resume.preview.fullName}</span>
                             <span className="text-[9px]">•</span>
                           </>
                         )}
                         <Clock size={10} className="shrink-0" />
-                        <p className="text-[11px] truncate">{timeAgo(resume.updatedAt)}</p>
+                        <p className="text-[11px] truncate">{timeAgo(resume.updatedAt, language, t)}</p>
                       </div>
                     </div>
 
@@ -467,47 +499,47 @@ export default function ResumesPage() {
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <button
-                            className="h-8 w-8 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/85 flex items-center justify-center transition-colors outline-none focus:ring-1 focus:ring-zinc-700"
+                            className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted flex items-center justify-center transition-colors outline-none focus:ring-1 focus:ring-ring"
                             onClick={(e) => e.stopPropagation()}
                             disabled={isBusy}
                           >
                             <MoreVertical size={16} />
                           </button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-40 bg-zinc-900 border border-zinc-800 text-zinc-300">
+                        <DropdownMenuContent align="end" className="w-40">
                           {/* Rename */}
                           <DropdownMenuItem
-                            className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-zinc-800 hover:text-zinc-100 focus:bg-zinc-800 focus:text-zinc-100 transition-colors"
+                            className="flex items-center gap-2 px-3 py-2 cursor-pointer focus:bg-accent focus:text-accent-foreground"
                             onClick={(e) => {
                               e.stopPropagation();
                               setRenameTarget(resume);
                             }}
                           >
-                            <Pencil size={13} className="text-zinc-500" />
-                            <span>Đổi tên</span>
+                            <Pencil size={13} className="text-muted-foreground" />
+                            <span>{t.rename}</span>
                           </DropdownMenuItem>
 
                           {/* Clone */}
                           <DropdownMenuItem
-                            className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-zinc-800 hover:text-zinc-100 focus:bg-zinc-800 focus:text-zinc-100 transition-colors"
+                            className="flex items-center gap-2 px-3 py-2 cursor-pointer focus:bg-accent focus:text-accent-foreground"
                             onClick={(e) => handleClone(e, resume._id)}
                           >
-                            <Copy size={13} className="text-zinc-500" />
-                            <span>Nhân bản</span>
+                            <Copy size={13} className="text-muted-foreground" />
+                            <span>{t.clone}</span>
                           </DropdownMenuItem>
 
-                          <DropdownMenuSeparator className="bg-zinc-800" />
+                          <DropdownMenuSeparator />
 
                           {/* Delete */}
                           <DropdownMenuItem
-                            className="flex items-center gap-2 px-3 py-2 cursor-pointer text-rose-400 hover:bg-rose-500/10 focus:bg-rose-500/10 focus:text-rose-400 transition-colors"
+                            className="flex items-center gap-2 px-3 py-2 cursor-pointer text-rose-500 focus:bg-rose-500/10 focus:text-rose-500"
                             onClick={(e) => {
                               e.stopPropagation();
                               setDeleteTargetId(resume._id);
                             }}
                           >
                             <Trash2 size={13} />
-                            <span>Xóa CV</span>
+                            <span>{t.deleteCv}</span>
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -520,12 +552,12 @@ export default function ResumesPage() {
             {/* Empty state */}
             {resumes.length === 0 && !isLoading && (
               <div className="col-span-full flex flex-col items-center justify-center py-16 gap-3 text-center">
-                <div className="h-16 w-16 rounded-2xl bg-zinc-800/80 flex items-center justify-center mb-2">
-                  <FileText size={28} className="text-zinc-600" />
+                <div className="h-16 w-16 rounded-2xl bg-muted flex items-center justify-center mb-2">
+                  <FileText size={28} className="text-muted-foreground" />
                 </div>
-                <p className="text-zinc-400 font-medium">Bạn chưa có CV nào</p>
-                <p className="text-zinc-600 text-sm max-w-xs">
-                  Nhấn vào &quot;Tạo CV mới&quot; để bắt đầu xây dựng CV chuyên nghiệp của bạn.
+                <p className="text-muted-foreground font-medium">{t.noCvsYet}</p>
+                <p className="text-muted-foreground/80 text-sm max-w-xs">
+                  {t.noCvsDesc}
                 </p>
               </div>
             )}
@@ -535,16 +567,16 @@ export default function ResumesPage() {
 
       {/* Delete Confirmation Alert Dialog */}
       <AlertDialog open={deleteTargetId !== null} onOpenChange={(open) => !open && setDeleteTargetId(null)}>
-        <AlertDialogContent className="bg-zinc-900 border border-zinc-800 text-zinc-100">
+        <AlertDialogContent className="bg-card border border-border text-foreground">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-zinc-100 font-bold">Bạn có chắc muốn xóa CV này không?</AlertDialogTitle>
-            <AlertDialogDescription className="text-zinc-400">
-              Hành động này sẽ xóa vĩnh viễn CV và tất cả các phiên bản của nó. Bạn không thể hoàn tác hành động này.
+            <AlertDialogTitle className="text-foreground font-bold">{t.deleteConfirmTitle}</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
+              {t.deleteConfirmDesc}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="bg-zinc-850 border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100">
-              Hủy
+            <AlertDialogCancel className="bg-muted border-border text-foreground hover:bg-accent hover:text-accent-foreground">
+              {t.deleteCancel}
             </AlertDialogCancel>
             <AlertDialogAction
               className="bg-rose-600 hover:bg-rose-500 text-zinc-50 border-none"
@@ -554,7 +586,7 @@ export default function ResumesPage() {
                 }
               }}
             >
-              Xóa CV
+              {t.deleteConfirm}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

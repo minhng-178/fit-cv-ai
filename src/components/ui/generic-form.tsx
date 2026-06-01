@@ -105,7 +105,7 @@ export function FormTextField({
 
   return (
     <div className={cn('space-y-1.5', className)}>
-      <label className="block text-xs font-medium text-zinc-400 uppercase tracking-wider">
+      <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wider">
         {label}
         {required && <span className="text-rose-500 ml-1">*</span>}
       </label>
@@ -167,7 +167,7 @@ export function FormTextArea({
 
   return (
     <div className={cn('space-y-1.5', className)}>
-      <label className="block text-xs font-medium text-zinc-400 uppercase tracking-wider">
+      <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wider">
         {label}
         {required && <span className="text-rose-500 ml-1">*</span>}
       </label>
@@ -178,7 +178,7 @@ export function FormTextArea({
         value={value}
         onChange={(e) => updateField(fullPath, e.target.value)}
         className={cn(
-          'flex min-h-[80px] w-full rounded-xl border border-zinc-800 bg-[#0c0c0e]/50 px-3.5 py-2.5 text-sm text-zinc-150 shadow-inner placeholder:text-zinc-600 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500/50 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300 resize-none',
+          'flex min-h-[80px] w-full rounded-xl border border-input bg-muted/40 text-sm text-foreground shadow-inner placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500/50 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300 resize-none',
           error && 'border-rose-500/80 focus-visible:border-rose-500 focus-visible:ring-rose-500/30'
         )}
       />
@@ -234,12 +234,12 @@ export function FormCheckbox({
       <div className="space-y-0.5 select-none">
         <label
           htmlFor={fullPath}
-          className="text-xs text-zinc-400 font-medium cursor-pointer"
+          className="text-xs text-muted-foreground font-medium cursor-pointer"
         >
           {label}
         </label>
         {description && (
-          <p className="text-[11px] text-zinc-500 leading-normal">{description}</p>
+          <p className="text-[11px] text-muted-foreground leading-normal">{description}</p>
         )}
       </div>
     </div>
@@ -279,7 +279,7 @@ export function FormDatePicker({
 
   return (
     <div className={cn('space-y-1.5', className)}>
-      <label className="block text-xs font-medium text-zinc-400 uppercase tracking-wider">
+      <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wider">
         {label}
         {required && <span className="text-rose-500 ml-1">*</span>}
       </label>

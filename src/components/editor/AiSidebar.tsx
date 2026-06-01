@@ -2,11 +2,11 @@
 
 import React, { useState } from 'react';
 import { useResumeStore } from '@/store/useResumeStore';
-import { AiSuggestionRewrite } from '@/types/resume';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Sparkles, Brain, Check, RefreshCw, AlertTriangle, CheckCircle2, ChevronRight } from 'lucide-react';
+import { Sparkles, Brain, Check, RefreshCw, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { translations } from '@/lib/i18n/translations';
 
 export default function AiSidebar() {
   const {
@@ -15,8 +15,11 @@ export default function AiSidebar() {
     activeSuggestionsApplied,
     runAiOptimization,
     applyAiSuggestion,
-    resetSuggestions
+    resetSuggestions,
+    language
   } = useResumeStore();
+
+  const t = translations[language] || translations.vi;
 
   const [jdText, setJdText] = useState('');
   const [company, setCompany] = useState('');
@@ -37,59 +40,59 @@ export default function AiSidebar() {
   const formatSectionName = (path: string) => {
     const main = path.split('.')[0];
     switch (main) {
-      case 'personalInfo': return 'Thông tin cá nhân';
-      case 'workExperience': return 'Kinh nghiệm làm việc';
-      case 'education': return 'Học vấn';
-      case 'skills': return 'Kỹ năng';
-      case 'projects': return 'Dự án';
-      case 'languages': return 'Ngoại ngữ';
-      case 'certifications': return 'Chứng chỉ';
-      default: return 'Khác';
+      case 'personalInfo': return t.personalInfo;
+      case 'workExperience': return t.workExperience;
+      case 'education': return t.education;
+      case 'skills': return t.skills;
+      case 'projects': return t.projects;
+      case 'languages': return t.languages;
+      case 'certifications': return t.certifications;
+      default: return t.aiSectionOther;
     }
   };
 
   return (
-    <div className="h-full flex flex-col bg-[#18181b]/50 backdrop-blur-xl border border-zinc-800/80 rounded-2xl overflow-hidden shadow-2xl">
+    <div className="h-full flex flex-col bg-card/50 backdrop-blur-xl border border-border rounded-2xl overflow-hidden shadow-2xl">
       {/* Header */}
-      <div className="p-4 border-b border-zinc-800/80 bg-[#0f0f11]/30 flex items-center gap-2 shrink-0">
+      <div className="p-4 border-b border-border bg-muted/30 flex items-center gap-2 shrink-0">
         <Sparkles className="text-emerald-400" size={18} />
-        <h2 className="font-bold text-zinc-100 text-base">Cố vấn Tối ưu AI (Gemini)</h2>
+        <h2 className="font-bold text-foreground text-base">{t.aiAdvisorTitle}</h2>
       </div>
 
       {/* Main Content Area */}
       <div className="flex-1 p-4 overflow-y-auto space-y-5">
         {!aiSuggestions && !isOptimizing && (
           <form onSubmit={handleSubmit} className="space-y-4">
-            <p className="text-xs text-zinc-400 leading-relaxed">
-              Nhập mô tả công việc (JD) bạn muốn ứng tuyển. Gemini sẽ phân tích CV của bạn và đưa ra đề xuất căn chỉnh tốt nhất.
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              {t.aiAdvisorDesc}
             </p>
 
             <div>
-              <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Công ty ứng tuyển</label>
+              <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">{t.aiCompanyLabel}</label>
               <Input
                 type="text"
                 value={company}
                 onChange={(e) => setCompany(e.target.value)}
-                placeholder="Ví dụ: VinGroup, FPT, Google..."
+                placeholder={t.aiCompanyPlaceholder}
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Vị trí ứng tuyển</label>
+              <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">{t.aiRoleLabel}</label>
               <Input
                 type="text"
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
-                placeholder="Ví dụ: Senior Frontend Engineer..."
+                placeholder={t.aiRolePlaceholder}
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Mô tả công việc (JD) *</label>
+              <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">{t.aiJdLabel}</label>
               <Textarea
                 value={jdText}
                 onChange={(e) => setJdText(e.target.value)}
-                placeholder="Dán toàn bộ nội dung JD vào đây để đối chiếu kỹ năng..."
+                placeholder={t.aiJdPlaceholder}
                 rows={8}
                 required
                 className="resize-none"
@@ -98,9 +101,9 @@ export default function AiSidebar() {
 
             <Button
               type="submit"
-              className="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-zinc-950 hover:opacity-95 shadow-lg shadow-emerald-500/10"
+              className="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white dark:text-zinc-950 hover:opacity-95 shadow-lg shadow-emerald-500/10"
             >
-              <Brain size={16} /> Phân tích & Tối ưu hóa
+              <Brain size={16} /> {t.aiBtnAnalyze}
             </Button>
           </form>
         )}
@@ -112,8 +115,8 @@ export default function AiSidebar() {
               <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-r-2 border-emerald-500"></div>
             </div>
             <div className="space-y-1">
-              <h4 className="text-zinc-200 font-semibold text-sm">Gemini đang phân tích</h4>
-              <p className="text-xs text-zinc-500 max-w-[200px]">Đang đối chiếu CV của bạn với JD để tạo đề xuất tối ưu...</p>
+              <h4 className="text-foreground font-semibold text-sm">{t.aiAnalyzingTitle}</h4>
+              <p className="text-xs text-muted-foreground max-w-[200px]">{t.aiAnalyzingDesc}</p>
             </div>
           </div>
         )}
@@ -121,14 +124,14 @@ export default function AiSidebar() {
         {aiSuggestions && !isOptimizing && (
           <div className="space-y-5">
             {/* Score & Controls Header */}
-            <div className="flex justify-between items-center bg-[#0f0f11]/40 border border-zinc-800/80 p-3 rounded-xl">
+            <div className="flex justify-between items-center bg-muted/10 border border-border p-3 rounded-xl">
               <div className="flex items-center gap-3">
                 <div className={`flex flex-col items-center justify-center h-12 w-12 rounded-lg border font-mono font-bold text-lg ${getScoreColor(aiSuggestions.overallScore)}`}>
                   {aiSuggestions.overallScore}
                 </div>
                 <div>
-                  <h4 className="text-zinc-200 font-bold text-xs">Điểm phù hợp ATS</h4>
-                  <p className="text-[10px] text-zinc-500">Tối thiểu nên đạt 75+ điểm</p>
+                  <h4 className="text-foreground font-bold text-xs">{t.aiScoreLabel}</h4>
+                  <p className="text-[10px] text-muted-foreground">{t.aiAtsScoreDesc}</p>
                 </div>
               </div>
               
@@ -136,16 +139,16 @@ export default function AiSidebar() {
                 onClick={resetSuggestions}
                 variant="secondary"
                 size="sm"
-                className="text-zinc-400 hover:text-zinc-200 bg-[#0f0f11]/60 px-2.5"
+                className="text-muted-foreground hover:text-foreground bg-muted/60 px-2.5"
               >
-                <RefreshCw size={12} /> Thử lại
+                <RefreshCw size={12} /> {t.timeMinutesAgo === 'phút trước' ? 'Thử lại' : 'Retry'}
               </Button>
             </div>
 
             {/* Analysis Summary */}
             <div className="space-y-1.5">
-              <h3 className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">Đánh giá tổng quan</h3>
-              <p className="text-xs text-zinc-300 bg-zinc-900/30 border border-zinc-900/80 p-3 rounded-xl leading-relaxed whitespace-pre-line">
+              <h3 className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{t.aiSuggestionsTitle}</h3>
+              <p className="text-xs text-foreground bg-muted/10 border border-border p-3 rounded-xl leading-relaxed whitespace-pre-line">
                 {aiSuggestions.analysisSummary}
               </p>
             </div>
@@ -153,10 +156,10 @@ export default function AiSidebar() {
             {/* Missing Keywords */}
             {aiSuggestions.missingKeywords?.length > 0 && (
               <div className="space-y-1.5">
-                <h3 className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1">
-                  <AlertTriangle size={12} className="text-amber-500" /> Từ khóa bị thiếu (JD có nhưng CV chưa có)
+                <h3 className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
+                  <AlertTriangle size={12} className="text-amber-500" /> {t.aiMissingKeywordsDesc}
                 </h3>
-                <div className="flex flex-wrap gap-1.5 bg-zinc-900/30 border border-zinc-900/80 p-3 rounded-xl">
+                <div className="flex flex-wrap gap-1.5 bg-muted/10 border border-border p-3 rounded-xl">
                   {aiSuggestions.missingKeywords.map((kw, i) => (
                     <span key={i} className="text-[10px] bg-amber-500/10 border border-amber-500/20 text-amber-400 px-2 py-0.5 rounded-md font-medium">
                       {kw}
@@ -169,17 +172,17 @@ export default function AiSidebar() {
             {/* Suggested Additions */}
             {aiSuggestions.suggestedAdditions?.length > 0 && (
               <div className="space-y-2">
-                <h3 className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">Đề xuất thêm mới</h3>
+                <h3 className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{t.aiAdditions}</h3>
                 <div className="space-y-2">
                   {aiSuggestions.suggestedAdditions.map((item, i) => (
-                    <div key={i} className="bg-zinc-900/30 border border-zinc-850 p-3 rounded-xl space-y-1.5 text-xs">
+                    <div key={i} className="bg-muted/10 border border-border p-3 rounded-xl space-y-1.5 text-xs">
                       <div className="flex justify-between items-center">
                         <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded uppercase">
                           {formatSectionName(item.section)}
                         </span>
                       </div>
-                      <p className="text-zinc-200 font-medium text-xs leading-relaxed">“{item.content}”</p>
-                      <div className="text-[10px] text-zinc-500 bg-[#0f0f11]/30 p-1.5 rounded border border-zinc-900/50">
+                      <p className="text-foreground font-medium text-xs leading-relaxed">“{item.content}”</p>
+                      <div className="text-[10px] text-muted-foreground bg-muted/20 p-1.5 rounded border border-border">
                         {item.reasoning}
                       </div>
                     </div>
@@ -191,18 +194,18 @@ export default function AiSidebar() {
             {/* Suggested Rewrites */}
             {aiSuggestions.suggestedRewrites?.length > 0 && (
               <div className="space-y-2">
-                <h3 className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">Đề xuất viết lại</h3>
+                <h3 className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{t.aiRewrites}</h3>
                 <div className="space-y-3">
                   {aiSuggestions.suggestedRewrites.map((rewrite, i) => {
                     const isApplied = activeSuggestionsApplied[`${rewrite.path}-${i}`];
                     return (
-                      <div key={i} className="bg-[#0f0f11]/40 border border-zinc-800/80 rounded-xl overflow-hidden text-xs">
+                      <div key={i} className="bg-muted/10 border border-border rounded-xl overflow-hidden text-xs">
                         {/* Rewrite Header */}
-                        <div className="bg-[#0f0f11]/80 px-3 py-2 border-b border-zinc-800/80 flex justify-between items-center">
-                          <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">
+                        <div className="bg-muted/80 px-3 py-2 border-b border-border flex justify-between items-center">
+                          <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
                             {formatSectionName(rewrite.path)}
                           </span>
-                          <span className="text-[9px] text-zinc-500 font-mono font-bold">
+                          <span className="text-[9px] text-muted-foreground font-mono font-bold">
                             #{i + 1}
                           </span>
                         </div>
@@ -212,8 +215,8 @@ export default function AiSidebar() {
                           {/* Original Text */}
                           {rewrite.originalText && (
                             <div className="space-y-1">
-                              <span className="text-[9px] font-semibold text-zinc-500 uppercase tracking-wider">Văn bản gốc:</span>
-                              <p className="text-zinc-400 text-xs italic bg-zinc-900/20 p-2 rounded border border-zinc-900/40">
+                              <span className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">{t.aiOriginalText}</span>
+                              <p className="text-muted-foreground text-xs italic bg-muted/10 p-2 rounded border border-border">
                                 “{rewrite.originalText}”
                               </p>
                             </div>
@@ -221,15 +224,15 @@ export default function AiSidebar() {
 
                           {/* Suggested Text */}
                           <div className="space-y-1">
-                            <span className="text-[9px] font-semibold text-emerald-500 uppercase tracking-wider">Gợi ý từ AI:</span>
-                            <p className="text-zinc-200 text-xs font-medium bg-emerald-500/5 p-2 rounded border border-emerald-500/10 leading-relaxed">
+                            <span className="text-[9px] font-semibold text-emerald-500 uppercase tracking-wider">{t.aiSuggestedText}</span>
+                            <p className="text-foreground text-xs font-medium bg-emerald-500/5 p-2 rounded border border-emerald-500/10 leading-relaxed">
                               “{rewrite.suggestedText}”
                             </p>
                           </div>
 
                           {/* Reasoning */}
-                          <div className="text-[10px] text-zinc-500 bg-[#0f0f11]/30 p-2 rounded border border-zinc-900/50 leading-relaxed">
-                            <span className="font-semibold text-zinc-400">Lý do: </span>
+                          <div className="text-[10px] text-muted-foreground bg-muted/20 p-2 rounded border border-border leading-relaxed">
+                            <span className="font-semibold text-muted-foreground">{t.aiReasonLabel}</span>
                             {rewrite.reasoning}
                           </div>
 
@@ -241,16 +244,16 @@ export default function AiSidebar() {
                             className={`w-full py-2 ${
                               isApplied 
                                 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 cursor-default hover:bg-emerald-500/10 hover:text-emerald-400' 
-                                : 'bg-emerald-500 text-zinc-950 hover:bg-emerald-400'
+                                : 'bg-emerald-500 text-white dark:text-zinc-950 hover:bg-emerald-400'
                             }`}
                           >
                             {isApplied ? (
                               <>
-                                <CheckCircle2 size={13} /> Đã áp dụng vào bản nháp
+                                <CheckCircle2 size={13} /> {t.aiApplied}
                               </>
                             ) : (
                               <>
-                                <Check size={13} /> Áp dụng gợi ý này
+                                <Check size={13} /> {t.aiApplyThis}
                               </>
                             )}
                           </Button>

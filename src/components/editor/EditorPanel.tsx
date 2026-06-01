@@ -11,7 +11,7 @@ export default function EditorPanel(): React.ReactElement {
 
   return (
     <SidebarProvider defaultOpen={true} className="h-full w-full min-h-0 bg-transparent flex-row flex">
-      <div className="flex h-full w-full bg-[#18181b]/50 backdrop-blur-xl border border-zinc-800/80 rounded-2xl overflow-hidden shadow-2xl relative">
+      <div className="flex h-full w-full bg-card/50 backdrop-blur-xl border border-border rounded-2xl overflow-hidden shadow-2xl relative">
         <EditorSidebar activeSection={activeSection} setActiveSection={setActiveSection} />
         <ContentPanel />
       </div>
