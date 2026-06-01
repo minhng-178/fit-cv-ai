@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
+import { ClerkProvider } from '@clerk/nextjs'
+import { viVN } from '@clerk/localizations';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,20 +28,26 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="vi"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col bg-background text-foreground transition-colors duration-250">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
+        <ClerkProvider
+          localization={viVN}
+
         >
-          {children}
-          <Toaster richColors closeButton />
-        </ThemeProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem
+            disableTransitionOnChange
+          >
+       
+            {children}
+            <Toaster richColors closeButton />
+          </ThemeProvider>
+        </ClerkProvider>
       </body>
     </html>
   );
