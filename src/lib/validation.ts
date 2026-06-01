@@ -1,17 +1,16 @@
 import { ResumeData } from '@/types/resume';
 
-// Helper to parse date string formatted as dd/mm/yyyy
+// Helper to parse date string formatted as YYYY/MM
 export function parseDateString(val: string): Date | null {
   if (!val) return null;
   const parts = val.split('/');
-  if (parts.length === 3) {
-    const d = parseInt(parts[0], 10);
+  if (parts.length === 2) {
+    const y = parseInt(parts[0], 10);
     const m = parseInt(parts[1], 10) - 1; // Date months are 0-indexed
-    const y = parseInt(parts[2], 10);
-    if (!isNaN(d) && !isNaN(m) && !isNaN(y)) {
-      const dt = new Date(y, m, d);
-      // Ensure date object values match the input values (handling invalid dates like 31/02)
-      if (dt.getFullYear() === y && dt.getMonth() === m && dt.getDate() === d) {
+    if (!isNaN(y) && !isNaN(m) && m >= 0 && m < 12) {
+      const dt = new Date(y, m, 1);
+      // Ensure date object values match the input values
+      if (dt.getFullYear() === y && dt.getMonth() === m) {
         return dt;
       }
     }
@@ -19,13 +18,13 @@ export function parseDateString(val: string): Date | null {
   return null;
 }
 
-// Check if string matches dd/mm/yyyy format
+// Check if string matches YYYY/MM format
 export function isValidDateFormat(val: string): boolean {
   if (!val) return true;
   // If it's a special keyword representing present/current, it's valid
   if (val.toLowerCase() === 'present' || val === 'Hiện tại' || val === '') return true;
   
-  const regex = /^\d{2}\/\d{2}\/\d{4}$/;
+  const regex = /^\d{4}\/\d{2}$/;
   if (!regex.test(val)) return false;
   
   return parseDateString(val) !== null;
@@ -88,7 +87,7 @@ export function validateResumeData(data: ResumeData): Record<string, string> {
       if (!exp.startDate?.trim()) {
         errors[`workExperience.${i}.startDate`] = 'Ngày bắt đầu không được để trống';
       } else if (!isValidDateFormat(exp.startDate)) {
-        errors[`workExperience.${i}.startDate`] = 'Định dạng ngày không hợp lệ (dd/mm/yyyy)';
+        errors[`workExperience.${i}.startDate`] = 'Định dạng ngày không hợp lệ (YYYY/MM)';
       } else {
         startDt = parseDateString(exp.startDate);
         if (startDt && startDt > today) {
@@ -101,7 +100,7 @@ export function validateResumeData(data: ResumeData): Record<string, string> {
         if (!exp.endDate?.trim()) {
           errors[`workExperience.${i}.endDate`] = 'Ngày kết thúc không được để trống';
         } else if (!isValidDateFormat(exp.endDate)) {
-          errors[`workExperience.${i}.endDate`] = 'Định dạng ngày không hợp lệ (dd/mm/yyyy)';
+          errors[`workExperience.${i}.endDate`] = 'Định dạng ngày không hợp lệ (YYYY/MM)';
         } else {
           endDt = parseDateString(exp.endDate);
           if (endDt && endDt > today) {
@@ -135,7 +134,7 @@ export function validateResumeData(data: ResumeData): Record<string, string> {
       if (!edu.startDate?.trim()) {
         errors[`education.${i}.startDate`] = 'Ngày bắt đầu không được để trống';
       } else if (!isValidDateFormat(edu.startDate)) {
-        errors[`education.${i}.startDate`] = 'Định dạng ngày không hợp lệ (dd/mm/yyyy)';
+        errors[`education.${i}.startDate`] = 'Định dạng ngày không hợp lệ (YYYY/MM)';
       } else {
         startDt = parseDateString(edu.startDate);
         if (startDt && startDt > today) {
@@ -146,7 +145,7 @@ export function validateResumeData(data: ResumeData): Record<string, string> {
       if (!edu.endDate?.trim()) {
         errors[`education.${i}.endDate`] = 'Ngày kết thúc không được để trống';
       } else if (!isValidDateFormat(edu.endDate)) {
-        errors[`education.${i}.endDate`] = 'Định dạng ngày không hợp lệ (dd/mm/yyyy)';
+        errors[`education.${i}.endDate`] = 'Định dạng ngày không hợp lệ (YYYY/MM)';
       } else {
         endDt = parseDateString(edu.endDate);
       }
@@ -203,7 +202,7 @@ export function validateResumeData(data: ResumeData): Record<string, string> {
       if (!cert.date?.trim()) {
         errors[`certifications.${i}.date`] = 'Ngày cấp không được để trống';
       } else if (!isValidDateFormat(cert.date)) {
-        errors[`certifications.${i}.date`] = 'Định dạng ngày không hợp lệ (dd/mm/yyyy)';
+        errors[`certifications.${i}.date`] = 'Định dạng ngày không hợp lệ (YYYY/MM)';
       } else {
         const dateDt = parseDateString(cert.date);
         if (dateDt && dateDt > today) {

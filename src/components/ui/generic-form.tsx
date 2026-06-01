@@ -178,7 +178,7 @@ export function FormTextArea({
         value={value}
         onChange={(e) => updateField(fullPath, e.target.value)}
         className={cn(
-          'flex min-h-[80px] w-full rounded-xl border border-input bg-muted/40 text-sm text-foreground shadow-inner placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500/50 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300 resize-none',
+          'flex min-h-[160px] w-full rounded-xl p-3 border border-input bg-muted/40 text-sm text-foreground shadow-inner placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500/50 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300 resize-none',
           error && 'border-rose-500/80 focus-visible:border-rose-500 focus-visible:ring-rose-500/30'
         )}
       />

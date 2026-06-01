@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Calendar as CalendarIcon } from 'lucide-react';
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from './popover';
 import { Button } from './button';
 import { Input } from './input';
@@ -16,22 +16,29 @@ interface DatePickerProps {
   hasError?: boolean;
 }
 
-export function DatePicker({ value, onChange, placeholder = 'dd/mm/yyyy', className, disabled, hasError }: DatePickerProps) {
+export function DatePicker({ value, onChange, placeholder = 'YYYY/MM', className, disabled, hasError }: DatePickerProps) {
   const [open, setOpen] = React.useState(false);
 
-  // Parse initial value (could be dd/mm/yyyy, yyyy-mm, yyyy, or empty)
+  // Parse initial value (could be YYYY/MM, dd/mm/yyyy, yyyy-mm, yyyy, or empty)
   const parseDate = (val: string): Date => {
     if (!val) return new Date();
     
-    // Check if format is dd/mm/yyyy
+    // Check if format is YYYY/MM or dd/mm/yyyy
     if (val.includes('/')) {
       const parts = val.split('/');
-      if (parts.length === 3) {
-        const d = parseInt(parts[0], 10);
+      if (parts.length === 2) {
+        const y = parseInt(parts[0], 10);
         const m = parseInt(parts[1], 10) - 1; // 0-indexed
+        if (!isNaN(y) && !isNaN(m) && m >= 0 && m < 12) {
+          return new Date(y, m, 1);
+        }
+      }
+      if (parts.length === 3) {
+        // Fallback for dd/mm/yyyy (parts: [d, m, y])
+        const m = parseInt(parts[1], 10) - 1;
         const y = parseInt(parts[2], 10);
-        if (!isNaN(d) && !isNaN(m) && !isNaN(y)) {
-          return new Date(y, m, d);
+        if (!isNaN(m) && !isNaN(y) && m >= 0 && m < 12) {
+          return new Date(y, m, 1);
         }
       }
     }
@@ -42,7 +49,7 @@ export function DatePicker({ value, onChange, placeholder = 'dd/mm/yyyy', classN
       if (parts.length === 2) {
         const y = parseInt(parts[0], 10);
         const m = parseInt(parts[1], 10) - 1;
-        if (!isNaN(y) && !isNaN(m)) {
+        if (!isNaN(y) && !isNaN(m) && m >= 0 && m < 12) {
           return new Date(y, m, 1);
         }
       }
@@ -69,38 +76,17 @@ export function DatePicker({ value, onChange, placeholder = 'dd/mm/yyyy', classN
   }, [selectedDate]);
 
   const year = currentDate.getFullYear();
-  const month = currentDate.getMonth();
-
-  const handleMonthChange = (newMonth: number) => {
-    setCurrentDate(new Date(year, newMonth, 1));
-  };
 
   const handleYearChange = (newYear: number) => {
-    setCurrentDate(new Date(newYear, month, 1));
+    setCurrentDate(new Date(newYear, currentDate.getMonth(), 1));
   };
 
-  const handleDateSelect = (day: number) => {
-    const d = new Date(year, month, day);
-    const dayStr = String(d.getDate()).padStart(2, '0');
-    const monthStr = String(d.getMonth() + 1).padStart(2, '0');
-    const yearStr = String(d.getFullYear());
-    onChange(`${dayStr}/${monthStr}/${yearStr}`);
+  const handleMonthSelect = (monthIdx: number) => {
+    const monthStr = String(monthIdx + 1).padStart(2, '0');
+    const yearStr = String(year);
+    onChange(`${yearStr}/${monthStr}`);
     setOpen(false);
   };
-
-  // Generate calendar days
-  const firstDayOfMonth = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  
-  const days = [];
-  // Empty slots for previous month's padding
-  for (let i = 0; i < firstDayOfMonth; i++) {
-    days.push(null);
-  }
-  // Days of the month
-  for (let i = 1; i <= daysInMonth; i++) {
-    days.push(i);
-  }
 
   const months = [
     'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
@@ -141,70 +127,63 @@ export function DatePicker({ value, onChange, placeholder = 'dd/mm/yyyy', classN
         <PopoverContent className="w-64 bg-popover border border-border text-popover-foreground p-3 select-none" align="end">
           {/* Header */}
           <div className="flex justify-between items-center gap-1 mb-3">
-            {/* Month Selector */}
-            <select
-              value={month}
-              onChange={(e) => handleMonthChange(parseInt(e.target.value, 10))}
-              className="bg-background border border-input rounded-lg px-2 py-1 text-xs text-foreground focus:outline-none focus:border-emerald-500 cursor-pointer"
+            <Button
+              variant="ghost"
+              size="icon"
+              type="button"
+              onClick={() => handleYearChange(year - 1)}
+              className="h-7 w-7 text-zinc-400 hover:text-zinc-200 hover:bg-muted p-0 flex items-center justify-center"
             >
-              {months.map((m, idx) => (
-                <option key={idx} value={idx}>{m}</option>
-              ))}
-            </select>
+              <ChevronLeft size={16} />
+            </Button>
 
             {/* Year Selector */}
             <select
               value={year}
               onChange={(e) => handleYearChange(parseInt(e.target.value, 10))}
-              className="bg-background border border-input rounded-lg px-2 py-1 text-xs text-foreground focus:outline-none focus:border-emerald-500 cursor-pointer"
+              className="bg-background border border-input rounded-lg px-2 py-1 text-xs font-semibold text-foreground focus:outline-none focus:border-emerald-500 cursor-pointer"
             >
               {years.map((y) => (
                 <option key={y} value={y}>{y}</option>
               ))}
             </select>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              type="button"
+              onClick={() => handleYearChange(year + 1)}
+              className="h-7 w-7 text-zinc-400 hover:text-zinc-200 hover:bg-muted p-0 flex items-center justify-center"
+            >
+              <ChevronRight size={16} />
+            </Button>
           </div>
 
-          {/* Weekday Labels */}
-          <div className="grid grid-cols-7 gap-1 text-center mb-1 text-[10px] text-muted-foreground font-bold uppercase">
-            <span>CN</span>
-            <span>T2</span>
-            <span>T3</span>
-            <span>T4</span>
-            <span>T5</span>
-            <span>T6</span>
-            <span>T7</span>
-          </div>
-
-          {/* Calendar Day Grid */}
-          <div className="grid grid-cols-7 gap-1">
-            {days.map((day, idx) => {
-              if (day === null) {
-                return <div key={`empty-${idx}`} />;
-              }
+          {/* Month Grid */}
+          <div className="grid grid-cols-3 gap-2">
+            {months.map((m, idx) => {
               const isSelected = selectedDate && 
-                selectedDate.getDate() === day && 
-                selectedDate.getMonth() === month && 
+                selectedDate.getMonth() === idx && 
                 selectedDate.getFullYear() === year;
 
-              const isToday = new Date().getDate() === day &&
-                new Date().getMonth() === month &&
+              const isCurrent = new Date().getMonth() === idx &&
                 new Date().getFullYear() === year;
 
               return (
                 <button
-                  key={`day-${day}`}
+                  key={idx}
                   type="button"
-                  onClick={() => handleDateSelect(day)}
+                  onClick={() => handleMonthSelect(idx)}
                   className={cn(
-                    'h-7 w-7 rounded-lg text-xs font-medium transition-all flex items-center justify-center',
+                    'h-10 rounded-lg text-xs font-medium transition-all flex items-center justify-center',
                     isSelected 
                       ? 'bg-emerald-500 text-white dark:text-zinc-950 font-bold' 
-                      : isToday
+                      : isCurrent
                       ? 'border border-emerald-500/50 text-emerald-400 bg-emerald-500/5'
                       : 'text-foreground hover:bg-accent hover:text-accent-foreground'
                   )}
                 >
-                  {day}
+                  {m}
                 </button>
               );
             })}

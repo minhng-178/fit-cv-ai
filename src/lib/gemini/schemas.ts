@@ -97,8 +97,8 @@ export const ResumeDataSchema: Schema = {
           company: { type: Type.STRING, description: "Tên công ty hoặc tổ chức làm việc" },
           position: { type: Type.STRING, description: "Vị trí, chức vụ đảm nhận" },
           location: { type: Type.STRING, description: "Địa điểm làm việc" },
-          startDate: { type: Type.STRING, description: "Tháng/năm bắt đầu (ví dụ: 2022-03)" },
-          endDate: { type: Type.STRING, description: "Tháng/năm kết thúc (ví dụ: 2024-05 hoặc 'Present')" },
+          startDate: { type: Type.STRING, description: "Tháng/năm bắt đầu (ví dụ: 2022/03)" },
+          endDate: { type: Type.STRING, description: "Tháng/năm kết thúc (ví dụ: 2024/05 hoặc 'Present')" },
           current: { type: Type.BOOLEAN, description: "Đang làm việc tại đây hay không" },
           description: {
             type: Type.ARRAY,
@@ -117,8 +117,8 @@ export const ResumeDataSchema: Schema = {
           degree: { type: Type.STRING, description: "Bằng cấp (ví dụ: Cử nhân, Kỹ sư)" },
           fieldOfStudy: { type: Type.STRING, description: "Chuyên ngành đào tạo" },
           location: { type: Type.STRING, description: "Địa điểm trường học" },
-          startDate: { type: Type.STRING, description: "Tháng/năm bắt đầu (ví dụ: 2018-09)" },
-          endDate: { type: Type.STRING, description: "Tháng/năm kết thúc (ví dụ: 2022-06)" },
+          startDate: { type: Type.STRING, description: "Tháng/năm bắt đầu (ví dụ: 2018/09)" },
+          endDate: { type: Type.STRING, description: "Tháng/năm kết thúc (ví dụ: 2022/06)" },
           description: { type: Type.STRING, description: "GPA, đề tài tốt nghiệp hoặc thành tích học tập nổi bật" }
         }
       }
@@ -171,7 +171,7 @@ export const ResumeDataSchema: Schema = {
         properties: {
           name: { type: Type.STRING, description: "Tên chứng chỉ" },
           issuer: { type: Type.STRING, description: "Nơi cấp chứng chỉ" },
-          date: { type: Type.STRING, description: "Thời gian cấp (ví dụ: 2023-11)" }
+          date: { type: Type.STRING, description: "Thời gian cấp (ví dụ: 2023/11)" }
         }
       }
     }

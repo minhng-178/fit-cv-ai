@@ -94,7 +94,7 @@ export default function ContentPanel(): React.ReactElement {
                 <FormTextField name="github" label={t.github} placeholder={t.githubPlaceholder} />
                 <FormTextField name="linkedin" label={t.linkedin} placeholder={t.linkedinPlaceholder} />
               </FormRow>
-              <FormTextArea name="summary" label={t.summary} placeholder={t.summaryPlaceholder} rows={4} />
+              <FormTextArea name="summary" label={t.summary} placeholder={t.summaryPlaceholder} rows={5} />
             </GenericForm>
           </div>
         )}
@@ -144,8 +144,8 @@ export default function ContentPanel(): React.ReactElement {
                     <FormTextField name="location" label={t.locationLabel} placeholder={t.locationPlaceholder} />
 
                     <div className="grid grid-cols-2 gap-4 mt-4">
-                      <FormDatePicker name="startDate" label={t.startDate} placeholder="dd/mm/yyyy" required />
-                      <FormDatePicker name="endDate" label={t.endDate} placeholder={exp.current ? t.present : 'dd/mm/yyyy'} disabled={exp.current} required={!exp.current} />
+                      <FormDatePicker name="startDate" label={t.startDate} placeholder="YYYY/MM" required />
+                      <FormDatePicker name="endDate" label={t.endDate} placeholder={exp.current ? t.present : 'YYYY/MM'} disabled={exp.current} required={!exp.current} />
                     </div>
 
                     <FormCheckbox
@@ -257,8 +257,8 @@ export default function ContentPanel(): React.ReactElement {
                     <FormTextField name="fieldOfStudy" label={t.fieldOfStudy} placeholder={t.fieldOfStudyPlaceholder} required />
 
                     <div className="grid grid-cols-2 gap-4">
-                      <FormDatePicker name="startDate" label={t.startDate} placeholder="dd/mm/yyyy" required />
-                      <FormDatePicker name="endDate" label={t.endDate} placeholder="dd/mm/yyyy" required />
+                      <FormDatePicker name="startDate" label={t.startDate} placeholder="YYYY/MM" required />
+                      <FormDatePicker name="endDate" label={t.endDate} placeholder="YYYY/MM" required />
                     </div>
 
                     <FormTextArea name="description" label={t.eduDescription} placeholder={t.eduDescriptionPlaceholder} rows={2} />
@@ -482,7 +482,7 @@ export default function ContentPanel(): React.ReactElement {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <FormTextField name="name" label={t.certName} placeholder={t.certNamePlaceholder} required />
                       <FormTextField name="issuer" label={t.certIssuer} placeholder={t.certIssuerPlaceholder} required />
-                      <FormDatePicker name="date" label={t.certDate} placeholder="dd/mm/yyyy" required />
+                      <FormDatePicker name="date" label={t.certDate} placeholder="YYYY/MM" required />
                     </div>
                   </GenericForm>
                 </div>

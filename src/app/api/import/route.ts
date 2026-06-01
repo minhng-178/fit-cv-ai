@@ -19,8 +19,8 @@ Nhiệm vụ của bạn là phân tích thông tin đầu vào (có thể là f
 
 YÊU CẦU TRÍCH XUẤT:
 1. Thông tin cá nhân (personalInfo): Trích xuất chính xác họ tên, vị trí ứng tuyển, email, số điện thoại, mạng xã hội, tóm tắt tiểu sử.
-2. Kinh nghiệm làm việc (workExperience): Trích xuất các vị trí công việc, công ty, thời gian (định dạng YYYY-MM), nhiệm vụ và kết quả (chia nhỏ thành mảng các gạch đầu dòng).
-3. Học vấn (education): Trích xuất trường học, bằng cấp, chuyên ngành, GPA hoặc thành tích khác.
+2. Kinh nghiệm làm việc (workExperience): Trích xuất các vị trí công việc, công ty, thời gian (định dạng YYYY/MM), nhiệm vụ và kết quả (chia nhỏ thành mảng các gạch đầu dòng).
+3. Học vấn (education): Trích xuất trường học, bằng cấp, chuyên ngành, GPA hoặc thành tích học tập khác.
 4. Kỹ năng (skills): Phân loại kỹ năng thành các nhóm (category) cụ thể (ví dụ: Languages, Frameworks, Soft Skills) và danh sách kỹ năng con (items).
 5. Dự án (projects): Trích xuất tên dự án, vai trò, mô tả ngắn gọn, công nghệ chính sử dụng, và đường dẫn nếu có.
 6. Ngoại ngữ (languages) & Chứng chỉ (certifications): Trích xuất đầy đủ và chính xác thông tin.
@@ -28,7 +28,7 @@ YÊU CẦU TRÍCH XUẤT:
 CHÚ Ý:
 - KHÔNG tự bịa ra thông tin không có trong tài liệu đầu vào.
 - Nếu không tìm thấy thông tin cho một trường cụ thể, hãy để trống hoặc bỏ qua trường đó, tuyệt đối không bịa đặt.
-- Định dạng ngày tháng bắt buộc dạng YYYY-MM (ví dụ: 2022-03) hoặc chữ "Present" cho công việc hiện tại.`;
+- Định dạng ngày tháng bắt buộc dạng YYYY/MM (ví dụ: 2022/03) hoặc chữ "Present" cho công việc hiện tại.`;
 
     // Case 1: FormData containing a PDF file upload
     if (contentType.includes('multipart/form-data')) {
@@ -111,6 +111,22 @@ CHÚ Ý:
       return NextResponse.json({ error: 'Định dạng yêu cầu không được hỗ trợ' }, { status: 415 });
     }
 
+    // Date normalization helper for incoming AI dates
+    const normalizeImportedDate = (dateStr?: string) => {
+      if (!dateStr) return '';
+      const cleaned = dateStr.trim();
+      // If matches YYYY-MM, replace - with /
+      if (/^\d{4}-\d{2}$/.test(cleaned)) {
+        return cleaned.replace('-', '/');
+      }
+      // If matches dd/mm/yyyy, convert to YYYY/MM
+      if (/^\d{2}\/\d{2}\/\d{4}$/.test(cleaned)) {
+        const parts = cleaned.split('/');
+        return `${parts[2]}/${parts[1]}`;
+      }
+      return cleaned;
+    };
+
     // Post-processing: Guarantee clean structure & generate frontend-ready unique IDs
     if (parsedResumeData) {
       // 1. Personal Info
@@ -123,6 +139,8 @@ CHÚ Ý:
         parsedResumeData.workExperience = parsedResumeData.workExperience.map((exp: any) => ({
           ...exp,
           id: exp.id || generateId('exp'),
+          startDate: normalizeImportedDate(exp.startDate),
+          endDate: normalizeImportedDate(exp.endDate),
           description: Array.isArray(exp.description) ? exp.description : [exp.description || ''],
           current: exp.current ?? (exp.endDate === 'Present'),
         }));
@@ -135,6 +153,8 @@ CHÚ Ý:
         parsedResumeData.education = parsedResumeData.education.map((edu: any) => ({
           ...edu,
           id: edu.id || generateId('edu'),
+          startDate: normalizeImportedDate(edu.startDate),
+          endDate: normalizeImportedDate(edu.endDate),
         }));
       } else {
         parsedResumeData.education = [];
@@ -177,6 +197,7 @@ CHÚ Ý:
         parsedResumeData.certifications = parsedResumeData.certifications.map((cert: any) => ({
           ...cert,
           id: cert.id || generateId('cert'),
+          date: normalizeImportedDate(cert.date),
         }));
       } else {
         parsedResumeData.certifications = [];
