@@ -113,7 +113,7 @@ export const useResumeStore = create<ResumeState>((set, get) => ({
   aiSuggestions: null,
   activeSuggestionsApplied: {},
   validationErrors: {},
-  language: typeof window !== 'undefined' ? (localStorage.getItem('fitcv_lang') as 'vi' | 'en') || 'vi' : 'vi',
+  language: 'vi',
 
   setActiveSection: (section) => set({ activeSection: section }),
 

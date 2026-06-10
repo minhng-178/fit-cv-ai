@@ -4,6 +4,7 @@ import React from 'react';
 import { usePathname } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import { useResumeStore } from '@/store/useResumeStore';
 
 export default function MainLayout({
   children,
@@ -11,6 +12,15 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const setLanguage = useResumeStore((s) => s.setLanguage);
+
+  React.useEffect(() => {
+    const savedLang = localStorage.getItem('fitcv_lang') as 'vi' | 'en';
+    if (savedLang && (savedLang === 'vi' || savedLang === 'en')) {
+      setLanguage(savedLang);
+    }
+  }, [setLanguage]);
+
   // Editor pages are at /resumes/[id] — need full-height, overflow-hidden layout
   const isEditor = pathname.startsWith('/resumes/') && pathname !== '/resumes';
 
